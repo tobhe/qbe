@@ -6,6 +6,7 @@ tools/  Miscellaneous tools (testing).
 test/   Tests.
 amd64/
 arm64/
+powerpc/
 rv64/   Architecture-specific code.
 
 The LICENSE file applies to all files distributed.
