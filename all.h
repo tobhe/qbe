@@ -200,10 +200,10 @@ enum {
 
 enum {
 	Kx = -1, /* "top" class (see usecheck() and clsmerge()) */
-	Kw,
-	Kl,
-	Ks,
-	Kd
+	Kw,	/* word */
+	Kl,	/* long */
+	Ks,	/* short */
+	Kd	/* double */
 };
 
 #define KWIDE(k) ((k)&1)
