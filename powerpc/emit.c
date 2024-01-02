@@ -10,7 +10,7 @@ static struct {
 	short cls;
 	char *asm;
 } omap[] = {
-	/* The %k is for the op class. For example addi. The %= is the same as %0, but maybe only in this */
+	/* The %k is for the op class. For example addi. The %= is the same as %0, but maybe only in this backend */
 	{ Oadd,    Ki, "add%k %=, %0, %1" },
 	/* Removed the dot here, but we need an s-class for single
 	e.g. fadds for float and fadd for double */
@@ -29,15 +29,18 @@ static struct {
 	{ Orem,    Ki, "divd %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
 	{ Ourem,   Ki, "divdu %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
 
-	{ Omul,    Ki, "mul%k %=, %0, %1" },
+	{ Omul,    Ki, "mullw%k %=, %0, %1" },
 	{ Omul,    Ka, "fmul%k %=, %0, %1" },
+	
 	{ Oand,    Ki, "and %=, %0, %1" },
 	{ Oor,     Ki, "or %=, %0, %1" },
 	{ Oxor,    Ki, "xor %=, %0, %1" },
 	
-	{ Osar,    Ki, "sra%k %=, %0, %1" },
-	{ Oshr,    Ki, "srl%k %=, %0, %1" },
-	{ Oshl,    Ki, "sll%k %=, %0, %1" },
+	{ Osar,    Ki, "sraw%k %=, %0, %1" },
+	/* TODO is the general shift right the logical shift right? */
+	{ Oshr,    Ki, "srw%k %=, %0, %1" },
+	{ Oshl,    Ki, "slw%k %=, %0, %1" },
+
 	{ Ocsltl,  Ki, "slt %=, %0, %1" },
 	{ Ocultl,  Ki, "sltu %=, %0, %1" },
 	
@@ -63,7 +66,7 @@ static struct {
 	{ Ostoreb, Kw, "stb %0, %M1" },
 	{ Ostoreh, Kw, "sth %0, %M1" },
 	{ Ostorew, Kw, "stw %0, %M1" },
-	/* double word, not double */
+	/* double word */
 	{ Ostorel, Ki, "std %0, %M1" },
 	{ Ostores, Kw, "stfs %0, %M1" },
 	{ Ostored, Kw, "stfd %0, %M1" },
@@ -111,8 +114,10 @@ static struct {
 	{ Ocast,   Kl, "fmv.x.d %=, %0" },
 	{ Ocast,   Ks, "fmv.w.x %=, %0" },
 	{ Ocast,   Kd, "fmv.d.x %=, %0" },
+
 	{ Ocopy,   Ki, "mv %=, %0" },
-	{ Ocopy,   Ka, "fmv%k %=, %0" },
+	{ Ocopy,   Ka, "fmr%k %=, %0" },
+	
 	{ Oswap,   Ki, "mv %?, %0\n\tmv %0, %1\n\tmv %1, %?" },
 	{ Oswap,   Ka, "fmv%k %?, %0\n\tfmv%k %0, %1\n\tfmv%k %1, %?" },
 	{ Oreqz,   Ki, "seqz %=, %0" },
