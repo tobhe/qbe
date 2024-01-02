@@ -19,38 +19,59 @@ static struct {
 	{ Osub,    Ka, "fsub%k %=, %0, %1" },
 	{ Oneg,    Ki, "neg%k %=, %0" },
 	{ Oneg,    Ka, "fneg%k %=, %0" },
-	{ Odiv,    Ki, "div%k %=, %0, %1" },
+	
+	/* TODO decide between divw and divd */
+	{ Odiv,    Ki, "divd%k %=, %0, %1" },
+	{ Oudiv,   Ki, "divdu%k %=, %0, %1" },
 	{ Odiv,    Ka, "fdiv%k %=, %0, %1" },
-	{ Orem,    Ki, "rem%k %=, %0, %1" },
-	{ Orem,    Kl, "rem %=, %0, %1" },
-	{ Oudiv,   Ki, "divu%k %=, %0, %1" },
-	{ Ourem,   Ki, "remu%k %=, %0, %1" },
+	
+	/* Powerpc does not have a rem instruction. Can we do the same as arm64? div and msub? */
+	{ Orem,    Ki, "divd %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
+	{ Ourem,   Ki, "divdu %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
+
 	{ Omul,    Ki, "mul%k %=, %0, %1" },
 	{ Omul,    Ka, "fmul%k %=, %0, %1" },
 	{ Oand,    Ki, "and %=, %0, %1" },
 	{ Oor,     Ki, "or %=, %0, %1" },
 	{ Oxor,    Ki, "xor %=, %0, %1" },
+	
 	{ Osar,    Ki, "sra%k %=, %0, %1" },
 	{ Oshr,    Ki, "srl%k %=, %0, %1" },
 	{ Oshl,    Ki, "sll%k %=, %0, %1" },
 	{ Ocsltl,  Ki, "slt %=, %0, %1" },
 	{ Ocultl,  Ki, "sltu %=, %0, %1" },
-	{ Oceqs,   Ki, "feq.s %=, %0, %1" },
-	{ Ocges,   Ki, "fge.s %=, %0, %1" },
-	{ Ocgts,   Ki, "fgt.s %=, %0, %1" },
-	{ Ocles,   Ki, "fle.s %=, %0, %1" },
-	{ Oclts,   Ki, "flt.s %=, %0, %1" },
-	{ Oceqd,   Ki, "feq.d %=, %0, %1" },
-	{ Ocged,   Ki, "fge.d %=, %0, %1" },
-	{ Ocgtd,   Ki, "fgt.d %=, %0, %1" },
-	{ Ocled,   Ki, "fle.d %=, %0, %1" },
-	{ Ocltd,   Ki, "flt.d %=, %0, %1" },
-	{ Ostoreb, Kw, "sb %0, %M1" },
-	{ Ostoreh, Kw, "sh %0, %M1" },
-	{ Ostorew, Kw, "sw %0, %M1" },
-	{ Ostorel, Ki, "sd %0, %M1" },
-	{ Ostores, Kw, "fsw %0, %M1" },
-	{ Ostored, Kw, "fsd %0, %M1" },
+	
+	/*
+	Comparisons:
+
+	1. fcmpu: Use ordered or unordered?
+	ordered NaN == NaN --> False
+	Used unordered for now to allow NaN comparison
+	There seems to be now difference between single and double
+
+	2. There seems to be no greater, equal etc. instructions.
+	--> Check ARM64 which also seems to only have compare instructions
+	```
+	*/
+	{ Oacmp,   Ki, "cmp %0, %1" },
+	{ Oafcmp,  Ka, "fcmpu %0, %1" },
+
+	/*
+	Store
+	added a "t", so sb became stb
+	*/
+	{ Ostoreb, Kw, "stb %0, %M1" },
+	{ Ostoreh, Kw, "sth %0, %M1" },
+	{ Ostorew, Kw, "stw %0, %M1" },
+	/* double word, not double */
+	{ Ostorel, Ki, "std %0, %M1" },
+	{ Ostores, Kw, "stfs %0, %M1" },
+	{ Ostored, Kw, "stfd %0, %M1" },
+	
+	/*
+	Load
+	Needs more research. What is the difference between algebraic and byte reversed?
+	*/
 	{ Oloadsb, Ki, "lb %=, %M0" },
 	{ Oloadub, Ki, "lbu %=, %M0" },
 	{ Oloadsh, Ki, "lh %=, %M0" },
@@ -65,6 +86,7 @@ static struct {
 	{ Oload,   Kl, "ld %=, %M0" },
 	{ Oload,   Ks, "flw %=, %M0" },
 	{ Oload,   Kd, "fld %=, %M0" },
+
 	{ Oextsb,  Ki, "sext.b %=, %0" },
 	{ Oextub,  Ki, "zext.b %=, %0" },
 	{ Oextsh,  Ki, "sext.h %=, %0" },
