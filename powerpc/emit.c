@@ -127,24 +127,22 @@ static struct {
 	{ NOp, 0, 0 }
 };
 
-static char *rname[] = {
-	[FP] = "fp",
-	[SP] = "sp",
-	[GP] = "gp",
-	[TP] = "tp",
-	[RA] = "ra",
-	[T0] = "t0", "t1", "t2", "t3", "t4", "t5",
-	[A0] = "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7",
-	[S1] = "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8",
-	       "s9", "s10", "s11",
-	[FT0] = "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6", "ft7",
-	        "ft8", "ft9", "ft10",
-	[FA0] = "fa0", "fa1", "fa2", "fa3", "fa4", "fa5", "fa6", "fa7",
-	[FS0] = "fs0", "fs1", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7",
-	        "fs8", "fs9", "fs10", "fs11",
-	[T6] = "t6",
-	[FT11] = "ft11",
-};
+static char *
+rname(int r)
+{
+	static char buf[4];
+
+	if (R0 <= r && r <= R12) {
+		sprintf(buf, "r%d", r - R0);
+	}
+	else if (R14 <= r && r <= R31) {
+		sprintf(buf, "r%d", r - R0 + 1);
+	}
+	else if (F0 <= r && r <= F31) {
+		sprintf(buf, "f%d", r - F0);
+	}
+	return buf;
+}
 
 static int64_t
 slot(Ref r, Fn *fn)
@@ -203,7 +201,7 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 		case '0':
 			r = c == '=' ? i->to : i->arg[0];
 			assert(isreg(r));
-			fputs(rname[r.val], f);
+			fputs(rname(r.val), f);
 			break;
 		case '1':
 			r = i->arg[1];
@@ -212,7 +210,7 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 				die("invalid second argument");
 			case RTmp:
 				assert(isreg(r));
-				fputs(rname[r.val], f);
+				fputs(rname(r.val), f);
 				break;
 			case RCon:
 				pc = &fn->con[r.val];
@@ -230,7 +228,7 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 			default:
 				die("invalid address argument");
 			case RTmp:
-				fprintf(f, "0(%s)", rname[r.val]);
+				fprintf(f, "0(%s)", rname(r.val));
 				break;
 			case RCon:
 				pc = &fn->con[r.val];
@@ -286,7 +284,7 @@ loadcon(Con *c, int r, int k, FILE *f)
 	char *rn;
 	int64_t n;
 
-	rn = rname[r];
+	rn = rname(r);
 	switch (c->type) {
 	case CAddr:
 		loadaddr(c, rn, f);
@@ -305,6 +303,11 @@ loadcon(Con *c, int r, int k, FILE *f)
 static void
 fixmem(Ref *pr, Fn *fn, FILE *f)
 {
+#if 1
+	(void) pr;
+	(void) fn;
+	(void) f;
+#else
 	Ref r;
 	int64_t s;
 	Con *c;
@@ -326,6 +329,7 @@ fixmem(Ref *pr, Fn *fn, FILE *f)
 			*pr = TMP(T6);
 		}
 	}
+#endif
 }
 
 static void
@@ -338,10 +342,12 @@ emitins(Ins *i, Fn *fn, FILE *f)
 
 	switch (i->op) {
 	default:
+#if 0
 		if (isload(i->op))
 			fixmem(&i->arg[0], fn, f);
 		else if (isstore(i->op))
 			fixmem(&i->arg[1], fn, f);
+#endif
 	Table:
 		/* most instructions are just pulled out of
 		 * the table omap[], some special cases are
@@ -401,7 +407,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		break;
 	case Oaddr:
 		assert(rtype(i->arg[0]) == RSlot);
-		rn = rname[i->to.val];
+		rn = rname(i->to.val);
 		s = slot(i->arg[0], fn);
 		if (-s < 2048) {
 			fprintf(f, "\tadd %s, fp, %"PRId64"\n", rn, s);
@@ -472,6 +478,9 @@ emitins(Ins *i, Fn *fn, FILE *f)
 void
 powerpc_emitfn(Fn *fn, FILE *f)
 {
+	(void) fn;
+	(void) f;
+#if 0
 	static int id0;
 	int lbl, neg, off, frame, *pr, r;
 	Blk *b, *s;
@@ -484,10 +493,10 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		 * unused by named arguments
 		 */
 		fprintf(f, "\tadd sp, sp, -64\n");
-		for (r=A0; r<=A7; r++)
+		for (r=R3; r<=R10; r++)
 			fprintf(f,
 				"\tsd %s, %d(sp)\n",
-				rname[r], 8 * (r - A0)
+				rname(r), 8 * (r - R0)
 			);
 	}
 	fprintf(f, "\tsd fp, -16(sp)\n");
@@ -516,8 +525,8 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		if (fn->reg & BIT(*pr)) {
 			fprintf(f,
 				"\t%s %s, %d(sp)\n",
-				*pr < FT0 ? "sd" : "fsd",
-				rname[*pr], off
+				*pr < F0 ? "sd" : "fsd",
+				rname(*pr), off
 			);
 			off += 8;
 		}
@@ -552,7 +561,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 					fprintf(f,
 						"\t%s %s, %d(sp)\n",
 						*pr < FT0 ? "ld" : "fld",
-						rname[*pr], off
+						rname(*pr), off
 					);
 					off += 8;
 				}
@@ -584,7 +593,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			fprintf(f,
 				"\tb%sz %s, .L%d\n",
 				neg ? "ne" : "eq",
-				rname[b->jmp.arg.val],
+				rname(b->jmp.arg.val),
 				id0+b->s2->id
 			);
 			goto Jmp;
@@ -592,4 +601,5 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	}
 	id0 += fn->nblk;
 	elf_emitfnfin(fn->name, f);
+#endif
 }
