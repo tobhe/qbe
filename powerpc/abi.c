@@ -36,8 +36,8 @@ struct Params {
 	int stk; /* stack offset for varargs */
 };
 
-static int gpreg[10] = {A0, A1, A2, A3, A4, A5, A6, A7};
-static int fpreg[10] = {FA0, FA1, FA2, FA3, FA4, FA5, FA6, FA7};
+static int gpreg[10] = {R3, R4, R5, R6, R7, R8, R9, R10};
+static int fpreg[10] = {F1, F2, F3, F4, F5, F6, F7, F8};
 
 /* layout of call's second argument (RCall)
  *
@@ -47,11 +47,11 @@ static int fpreg[10] = {FA0, FA1, FA2, FA3, FA4, FA5, FA6, FA7};
  *        |   |    |  ` fp regs returned    (0..2)
  *        |   |    ` gp regs passed         (0..8)
  *        |    ` fp regs passed             (0..8)
- *        ` env pointer passed in t5        (0..1)
+ *        ` env pointer passed in R11       (0..1)
  */
 
 bits
-rv64_retregs(Ref r, int p[2])
+powerpc_retregs(Ref r, int p[2])
 {
 	bits b;
 	int ngp, nfp;
@@ -65,32 +65,32 @@ rv64_retregs(Ref r, int p[2])
 	}
 	b = 0;
 	while (ngp--)
-		b |= BIT(A0+ngp);
+		b |= BIT(R0+ngp);
 	while (nfp--)
-		b |= BIT(FA0+nfp);
+		b |= BIT(F0+nfp);
 	return b;
 }
 
 bits
-rv64_argregs(Ref r, int p[2])
+powerpc_argregs(Ref r, int p[2])
 {
 	bits b;
-	int ngp, nfp, t5;
+	int ngp, nfp, r11;
 
 	assert(rtype(r) == RCall);
 	ngp = (r.val >> 4) & 15;
 	nfp = (r.val >> 8) & 15;
-	t5 = (r.val >> 12) & 1;
+	r11 = (r.val >> 12) & 1;
 	if (p) {
-		p[0] = ngp + t5;
+		p[0] = ngp + r11;
 		p[1] = nfp;
 	}
 	b = 0;
 	while (ngp--)
-		b |= BIT(A0+ngp);
+		b |= BIT(R0+ngp);
 	while (nfp--)
-		b |= BIT(FA0+nfp);
-	return b | ((bits)t5 << T5);
+		b |= BIT(F0+nfp);
+	return b | ((bits)r11 << R11);
 }
 
 static int
@@ -232,10 +232,10 @@ selret(Blk *b, Fn *fn)
 	} else {
 		k = j - Jretw;
 		if (KBASE(k) == 0) {
-			emit(Ocopy, k, TMP(A0), r, R);
+			emit(Ocopy, k, TMP(R0), r, R);
 			cty = 1;
 		} else {
-			emit(Ocopy, k, TMP(FA0), r, R);
+			emit(Ocopy, k, TMP(F0), r, R);
 			cty = 1 << 2;
 		}
 	}
@@ -309,7 +309,7 @@ argsclass(Ins *i0, Ins *i1, Class *carg, int retptr)
 			break;
 		case Opare:
 		case Oarge:
-			*c->reg = T5;
+			*c->reg = R11;
 			*c->cls = Kl;
 			envc = 1;
 			break;
@@ -377,7 +377,7 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 			 * followed by copies from regs,
 			 * so we emit a dummy
 			 */
-			emit(Ocopy, Kw, R, TMP(A0), R);
+			emit(Ocopy, Kw, R, TMP(R0), R);
 		else {
 			sttmps(tmp, cr.nreg, &cr, i1->to, fn);
 			for (j=0; j<cr.nreg; j++) {
@@ -386,10 +386,10 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 			}
 		}
 	} else if (KBASE(i1->cls) == 0) {
-		emit(Ocopy, i1->cls, i1->to, TMP(A0), R);
+		emit(Ocopy, i1->cls, i1->to, TMP(R0), R);
 		cty |= 1;
 	} else {
-		emit(Ocopy, i1->cls, i1->to, TMP(FA0), R);
+		emit(Ocopy, i1->cls, i1->to, TMP(F0), R);
 		cty |= 1 << 2;
 	}
 
@@ -397,7 +397,7 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 
 	if (cr.class & Cptr)
 		/* struct return argument */
-		emit(Ocopy, Kl, TMP(A0), i1->to, R);
+		emit(Ocopy, Kl, TMP(R0), i1->to, R);
 
 	/* move arguments into registers */
 	for (i=i0, c=ca; i<i1; i++, c++) {
@@ -492,7 +492,7 @@ selpar(Fn *fn, Ins *i0, Ins *i1)
 		typclass(&cr, &typ[fn->retty], 1, gpreg, fpreg);
 		if (cr.class & Cptr) {
 			fn->retr = newtmp("abi", Kl, fn);
-			emit(Ocopy, Kl, fn->retr, TMP(A0), R);
+			emit(Ocopy, Kl, fn->retr, TMP(R0), R);
 		}
 	}
 
