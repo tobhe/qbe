@@ -20,18 +20,19 @@ static struct {
 	{ Oneg,    Ki, "neg%k %=, %0" },
 	{ Oneg,    Ka, "fneg%k %=, %0" },
 	
-	/* TODO decide between divw and divd */
-	{ Odiv,    Ki, "divd%k %=, %0, %1" },
-	{ Oudiv,   Ki, "divdu%k %=, %0, %1" },
+	{ Odiv,    Ki, "div%k %=, %0, %1" },
+	{ Oudiv,   Ki, "div%ku %=, %0, %1" },
 	{ Odiv,    Ka, "fdiv%k %=, %0, %1" },
 	
 	/* Powerpc does not have a rem instruction. Can we do the same as arm64? div and msub? */
-	{ Orem,    Ki, "divd %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
-	{ Ourem,   Ki, "divdu %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
+	{ Orem,    Ki, "div%k %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
+	{ Ourem,   Ki, "div%ku %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
 
-	{ Omul,    Ki, "mullw%k %=, %0, %1" },
+	/* Here %k could be w for word and d for double word */
+	{ Omul,    Ki, "mull%k %=, %0, %1" },
 	{ Omul,    Ka, "fmul%k %=, %0, %1" },
 	
+	/* logical operators */
 	{ Oand,    Ki, "and %=, %0, %1" },
 	{ Oor,     Ki, "or %=, %0, %1" },
 	{ Oxor,    Ki, "xor %=, %0, %1" },
