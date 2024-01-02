@@ -14,11 +14,11 @@ enum PowerpcReg {
 	R11, R12,
 
 	/* reserved */
-	R13,
+	/* R13, */
 
 	/* callee-saved */
 	R14, R15, R16, R17, R18, R19, R20, R21, R22,
-	R23, R24, R25, R26, R27, R28, R29, R30, R31
+	R23, R24, R25, R26, R27, R28, R29, R30, R31,
 
 	/* scratch */
 	F0,
@@ -30,11 +30,11 @@ enum PowerpcReg {
 	/* callee-saved */
 	F14, F15, F16, F17, F18, F19, F20, F21,
 	F22, F23, F24, F25, F26, F27, F28, F29,
-	F30, F31, F31
+	F30, F31,
 
-	NFPR = F32 - F0 + 1,
+	NFPR = F31 - F0 + 1,
 	NGPR = R31 - R0 + 1,
-	NGPS = R10 - R0 + 1,
+	NGPS = R12 - R0 + 1,
 	NFPS = F13 - F0 + 1,
 	NCLR = (R31 - R14 + 1) + (F31 - F14 + 1),
 };
@@ -58,4 +58,4 @@ void rv64_abi(Fn *);
 void rv64_isel(Fn *);
 
 /* emit.c */
-void rv64_emitfn(Fn *, FILE *);
+void powerpc_emitfn(Fn *, FILE *);
