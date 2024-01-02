@@ -5,12 +5,22 @@ enum {
 	Ka = -2, /* matches all classes */
 };
 
+/* Instruction format strings:
+ * %k  is used to set the class of the instruction,
+ *     it'll expand to
+ * 			"w" word
+ *          "d" double word
+ *     on the instruction class
+ * %0  designates the first argument
+ * %1  designates the second argument
+ * %=  designates the result
+ */
+
 static struct {
 	short op;
 	short cls;
 	char *asm;
 } omap[] = {
-	/* The %k is for the op class. For example addi. The %= is the same as %0, but maybe only in this backend */
 	{ Oadd,    Ki, "add%k %=, %0, %1" },
 	/* Removed the dot here, but we need an s-class for single
 	e.g. fadds for float and fadd for double */
