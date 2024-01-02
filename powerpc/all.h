@@ -2,34 +2,43 @@
 
 typedef struct Rv64Op Rv64Op;
 
-enum Rv64Reg {
-	/* caller-save */
-	T0 = RXX + 1, T1, T2, T3, T4, T5,
-	A0, A1, A2, A3, A4, A5, A6, A7,
+enum PowerpcReg {
+	R0 = RXX + 1,
 
-	/* callee-save */
-	S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11,
+	/* SP, TOC */
+	R1, R2,
 
-	/* globally live */
-	FP, SP, GP, TP, RA,
+	/* caller-saved */
+	R3, R4, R5, R6, R7, R8, R9, R10,
 
-	/* FP caller-save */
-	FT0, FT1, FT2, FT3, FT4, FT5, FT6, FT7, FT8, FT9, FT10,
-	FA0, FA1, FA2, FA3, FA4, FA5, FA6, FA7,
+	R11, R12,
 
-	/* FP callee-save */
-	FS0, FS1, FS2, FS3, FS4, FS5, FS6, FS7, FS8, FS9, FS10, FS11,
+	/* reserved */
+	R13,
 
-	/* reserved (see rv64/emit.c) */
-	T6, FT11,
+	/* callee-saved */
+	R14, R15, R16, R17, R18, R19, R20, R21, R22,
+	R23, R24, R25, R26, R27, R28, R29, R30, R31
 
-	NFPR = FS11 - FT0 + 1,
-	NGPR = RA - T0 + 1,
-	NGPS = A7 - T0 + 1,
-	NFPS = FA7 - FT0 + 1,
-	NCLR = (S11 - S1 + 1) + (FS11 - FS0 + 1),
+	/* scratch */
+	F0,
+
+	/* caller-saved */
+	F1, F2, F3, F4, F5, F6, F7, F8,
+	F9, F10, F11, F12, F13,
+
+	/* callee-saved */
+	F14, F15, F16, F17, F18, F19, F20, F21,
+	F22, F23, F24, F25, F26, F27, F28, F29,
+	F30, F31, F31
+
+	NFPR = F32 - F0 + 1,
+	NGPR = R31 - R0 + 1,
+	NGPS = R10 - R0 + 1,
+	NFPS = F13 - F0 + 1,
+	NCLR = (R31 - R14 + 1) + (F31 - F14 + 1),
 };
-MAKESURE(reg_not_tmp, FT11 < (int)Tmp0);
+MAKESURE(reg_not_tmp, F31 < (int)Tmp0);
 
 struct Rv64Op {
 	char imm;
