@@ -514,7 +514,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	fprintf(f, "\tadd fp, sp, -16\n");
 
 	frame = (16 + 4 * fn->slot + 15) & ~15;
-	for (pr=rv64_rclob; *pr>=0; pr++) {
+	for (pr=powerpc_rclob; *pr>=0; pr++) {
 		if (fn->reg & BIT(*pr))
 			frame += 8;
 	}
@@ -531,7 +531,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			"\tsub sp, sp, t6\n",
 			frame
 		);
-	for (pr=rv64_rclob, off=0; *pr>=0; pr++) {
+	for (pr=powerpc_rclob, off=0; *pr>=0; pr++) {
 		if (fn->reg & BIT(*pr)) {
 			fprintf(f,
 				"\t%s %s, %d(sp)\n",
@@ -566,7 +566,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 						frame - 16
 					);
 			}
-			for (pr=rv64_rclob, off=0; *pr>=0; pr++) {
+			for (pr=powerpc_rclob, off=0; *pr>=0; pr++) {
 				if (fn->reg & BIT(*pr)) {
 					fprintf(f,
 						"\t%s %s, %d(sp)\n",

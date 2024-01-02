@@ -1,6 +1,6 @@
 #include "all.h"
 
-Rv64Op rv64_op[NOp] = {
+PowerpcOp powerpc_op[NOp] = {
 #define O(op, t, x) [O##op] =
 #define V(imm) { imm },
 #include "../ops.h"
@@ -26,7 +26,7 @@ int powerpc_rclob[] = {
 #define RGLOB (BIT(R1) | BIT(R2))
 
 static int
-rv64_memargs(int op)
+powerpc_memargs(int op)
 {
 	(void)op;
 	return 0;
@@ -42,12 +42,12 @@ Target T_powerpc = {
 	.nrglob = 5,
 	.rsave = powerpc_rsave,
 	.nrsave = {NGPS, NFPS},
-	.retregs = rv64_retregs,
-	.argregs = rv64_argregs,
-	.memargs = rv64_memargs,
+	.retregs = powerpc_retregs,
+	.argregs = powerpc_argregs,
+	.memargs = powerpc_memargs,
 	.abi0 = elimsb,
-	.abi1 = rv64_abi,
-	.isel = rv64_isel,
+	.abi1 = powerpc_abi,
+	.isel = powerpc_isel,
 	.emitfn = powerpc_emitfn,
 	.emitfin = elf_emitfin,
 	.asloc = ".L",

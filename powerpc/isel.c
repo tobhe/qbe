@@ -13,7 +13,7 @@ memarg(Ref *r, int op, Ins *i)
 static int
 immarg(Ref *r, int op, Ins *i)
 {
-	return rv64_op[op].imm && r == &i->arg[1];
+	return powerpc_op[op].imm && r == &i->arg[1];
 }
 
 static void
@@ -204,7 +204,7 @@ seljmp(Blk *b, Fn *fn)
 }
 
 void
-rv64_isel(Fn *fn)
+powerpc_isel(Fn *fn)
 {
 	Blk *b, **sb;
 	Ins *i;

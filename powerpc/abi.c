@@ -442,7 +442,7 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 				/* TODO: we only need this sign
 				 * extension for l temps passed
 				 * as w arguments
-				 * (see rv64/isel.c:fixarg)
+				 * (see powerpc/isel.c:fixarg)
 				 */
 				curi->op = Ostorel;
 				curi->arg[0] = newtmp("abi", Kl, fn);
@@ -497,7 +497,7 @@ selpar(Fn *fn, Ins *i0, Ins *i1)
 	}
 
 	cty = argsclass(i0, i1, ca, cr.class & Cptr);
-	fn->reg = rv64_argregs(CALL(cty), 0);
+	fn->reg = powerpc_argregs(CALL(cty), 0);
 
 	il = 0;
 	t = tmp;
@@ -584,7 +584,7 @@ selvastart(Fn *fn, Params p, Ref ap)
 }
 
 void
-rv64_abi(Fn *fn)
+powerpc_abi(Fn *fn)
 {
 	Blk *b;
 	Ins *i, *i0, *ip;

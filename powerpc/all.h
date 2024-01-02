@@ -1,6 +1,6 @@
 #include "../all.h"
 
-typedef struct Rv64Op Rv64Op;
+typedef struct PowerpcOp PowerpcOp;
 
 enum PowerpcReg {
 	R0 = RXX + 1,
@@ -41,22 +41,22 @@ enum PowerpcReg {
 };
 MAKESURE(reg_not_tmp, F31 < (int)Tmp0);
 
-struct Rv64Op {
+struct PowerpcOp {
 	char imm;
 };
 
 /* targ.c */
-extern int rv64_rsave[];
-extern int rv64_rclob[];
-extern Rv64Op rv64_op[];
+extern int powerpc_rsave[];
+extern int powerpc_rclob[];
+extern PowerpcOp powerpc_op[];
 
 /* abi.c */
-bits rv64_retregs(Ref, int[2]);
-bits rv64_argregs(Ref, int[2]);
-void rv64_abi(Fn *);
+bits powerpc_retregs(Ref, int[2]);
+bits powerpc_argregs(Ref, int[2]);
+void powerpc_abi(Fn *);
 
 /* isel.c */
-void rv64_isel(Fn *);
+void powerpc_isel(Fn *);
 
 /* emit.c */
 void powerpc_emitfn(Fn *, FILE *);
