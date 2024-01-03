@@ -84,22 +84,21 @@ static struct {
 	
 	/*
 	Load
-	Needs more research. What is the difference between algebraic and byte reversed?
 	*/
-	{ Oloadsb, Ki, "lb %=, %M0" },
-	{ Oloadub, Ki, "lbu %=, %M0" },
-	{ Oloadsh, Ki, "lh %=, %M0" },
-	{ Oloaduh, Ki, "lhu %=, %M0" },
-	{ Oloadsw, Ki, "lw %=, %M0" },
-	/* riscv64 always sign-extends 32-bit
-	 * values stored in 64-bit registers
-	 */
-	{ Oloaduw, Kw, "lw %=, %M0" },
-	{ Oloaduw, Kl, "lwu %=, %M0" },
-	{ Oload,   Kw, "lw %=, %M0" },
-	{ Oload,   Kl, "ld %=, %M0" },
-	{ Oload,   Ks, "flw %=, %M0" },
-	{ Oload,   Kd, "fld %=, %M0" },
+	{ Oloadsb, Ki, "lbz %=, %M0" },
+	{ Oloadub, Ki, "lbz %=, %M0" },
+	{ Oloadsh, Ki, "lhz %=, %M0" },
+	{ Oloaduh, Ki, "lhz %=, %M0" },
+	{ Oloadsw, Ki, "lwz %=, %M0" },
+	{ Oloaduw, Kw, "lwz %=, %M0" },
+
+	{ Oload,   Kw, "lwz %=, %M0" },
+	/* TODO loading a long long needs two lwz */
+	{ Oload,   Kl, "lwz %=, %M0" },
+
+	{ Oload,   Ks, "lfs %=, %M0" },
+	{ Oload,   Kd, "lfd %=, %M0" },
+
 
 	{ Oextsb,  Ki, "sext.b %=, %0" },
 	{ Oextub,  Ki, "zext.b %=, %0" },
