@@ -150,13 +150,13 @@ rname(int r)
 	static char buf[4];
 
 	if (R0 <= r && r <= R12) {
-		sprintf(buf, "r%d", r - R0);
+		sprintf(buf, "%d", r - R0);
 	}
 	else if (R14 <= r && r <= R31) {
-		sprintf(buf, "r%d", r - R0 + 1);
+		sprintf(buf, "%d", r - R0 + 1);
 	}
 	else if (F0 <= r && r <= F31) {
-		sprintf(buf, "f%d", r - F0);
+		sprintf(buf, "%d", r - F0);
 	}
 	return buf;
 }
@@ -495,25 +495,47 @@ emitins(Ins *i, Fn *fn, FILE *f)
 void
 powerpc_emitfn(Fn *fn, FILE *f)
 {
+	static int id0;
+	int lbl;
+	Blk *b;
+	Ins *i;
+
 	emitfnlnk(fn->name, &fn->lnk, f);
 
 	/* Adjust SP + Back chain */
-	fprintf(f, "\tstwu 1, -32\n");
+	fprintf(f, "\tstwu 1, -32(1)\n");
 
-	/* Load return value in return register */
-	/* TODO change 9 to actal register*/
-	fprintf(f, "\tmr 3,9");
+	for (lbl=0, b=fn->start; b; b=b->link) {
+		if (lbl || b->npred > 1)
+			fprintf(f, ".L%d:\n", id0+b->id);
+		for (i=b->ins; i!=&b->ins[b->nins]; i++)
+			emitins(i, fn, f);
+		lbl = 1;
+		switch (b->jmp.type) {
+		case Jhlt:
+			fprintf(f, "\ttrap\n");
+			break;
+		case Jret0:
+			/* Load return value in return register */
+			/* TODO change 9 to actal register*/
+			fprintf(f, "\tmr 3,9");
 
-	/* Calculate environment pointer */
-	fprintf(f, "\taddi 11,31,32");
-	fprintf(f, "\tlwz 31,-4(11)");
+			/* Calculate environment pointer */
+			fprintf(f, "\taddi 11,31,32");
+			fprintf(f, "\tlwz 31,-4(11)");
 
-	/* Reset stack pointer */
-	fprintf(f, "\tmr 1,11");
+			/* Reset stack pointer */
+			fprintf(f, "\tmr 1,11");
 
-	/* return */
-	fprintf(f, "\tblr");
+			/* return */
+			fprintf(f, "\tblr");
 
+			break;
+		}
+	}
+
+
+	id0 += fn->nblk;
 	elf_emitfnfin(fn->name, f);
 #if 0
 	static int id0;
