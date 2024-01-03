@@ -518,17 +518,17 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		case Jret0:
 			/* Load return value in return register */
 			/* TODO change 9 to actal register*/
-			fprintf(f, "\tmr 3,9");
+			fprintf(f, "\tmr 3,9\n");
 
 			/* Calculate environment pointer */
-			fprintf(f, "\taddi 11,31,32");
-			fprintf(f, "\tlwz 31,-4(11)");
+			fprintf(f, "\taddi 11,31,32\n");
+			fprintf(f, "\tlwz 31,-4(11)\n");
 
 			/* Reset stack pointer */
-			fprintf(f, "\tmr 1,11");
+			fprintf(f, "\tmr 1,11\n");
 
 			/* return */
-			fprintf(f, "\tblr");
+			fprintf(f, "\tblr\n");
 
 			break;
 		}
