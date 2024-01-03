@@ -65,9 +65,9 @@ powerpc_retregs(Ref r, int p[2])
 	}
 	b = 0;
 	while (ngp--)
-		b |= BIT(R0+ngp);
+		b |= BIT(R3+ngp);
 	while (nfp--)
-		b |= BIT(F0+nfp);
+		b |= BIT(F1+nfp);
 	return b;
 }
 
@@ -87,9 +87,9 @@ powerpc_argregs(Ref r, int p[2])
 	}
 	b = 0;
 	while (ngp--)
-		b |= BIT(R0+ngp);
+		b |= BIT(R3+ngp);
 	while (nfp--)
-		b |= BIT(F0+nfp);
+		b |= BIT(F1+nfp);
 	return b | ((bits)r11 << R11);
 }
 
