@@ -493,6 +493,20 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	/* Adjust SP + Back chain */
 	fprintf(f, "\tstwu 1, -32\n");
 
+	/* Load return value in return register */
+	/* TODO change 9 to actal register*/
+	fprintf(f, "\tmr 3,9");
+
+	/* Calculate environment pointer */
+	fprintf(f, "\taddi 11,31,32");
+	fprintf(f, "\tlwz 31,-4(11)");
+
+	/* Reset stack pointer */
+	fprintf(f, "\tmr 1,11");
+
+	/* return */
+	fprintf(f, "\tblr");
+
 	elf_emitfnfin(fn->name, f);
 #if 0
 	static int id0;
