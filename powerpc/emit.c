@@ -488,15 +488,18 @@ emitins(Ins *i, Fn *fn, FILE *f)
 void
 powerpc_emitfn(Fn *fn, FILE *f)
 {
-	(void) fn;
-	(void) f;
+	emitfnlnk(fn->name, &fn->lnk, f);
+
+	/* Adjust SP + Back chain */
+	fprintf(f, "\tstwu 1, -32\n");
+
+	elf_emitfnfin(fn->name, f);
 #if 0
 	static int id0;
 	int lbl, neg, off, frame, *pr, r;
 	Blk *b, *s;
 	Ins *i;
 
-	emitfnlnk(fn->name, &fn->lnk, f);
 
 	if (fn->vararg) {
 		/* TODO: only need space for registers
@@ -509,7 +512,6 @@ powerpc_emitfn(Fn *fn, FILE *f)
 				rname(r), 8 * (r - R0)
 			);
 	}
-	fprintf(f, "\tsd fp, -16(sp)\n");
 	fprintf(f, "\tsd ra, -8(sp)\n");
 	fprintf(f, "\tadd fp, sp, -16\n");
 
