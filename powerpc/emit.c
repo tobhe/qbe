@@ -463,25 +463,25 @@ emitins(Ins *i, Fn *fn, FILE *f)
   Stack-frame layout:
 
   +=============+
-  | varargs     |
-  |  save area  |
+  |   FP save   |
+  |    area     |
   +-------------+
-  |  saved ra   |
-  |  saved fp   |
-  +-------------+ <- fp
-  |    ...      |
-  | spill slots |
-  |    ...      |
+  |   GP save   |
+  |    area     |
+  +-------------+
+  | callee-save |
+  |  registers  |
   +-------------+
   |    ...      |
   |   locals    |
   |    ...      |
-  +-------------+
-  |   padding   |
-  +-------------+
-  | callee-save |
-  |  registers  |
-  +=============+
+  +-------------+ 
+  |    ...      |
+  | spill slots |
+  |    ...      |
+  +-------------+ 
+  |   LR save   |
+  +=============+ <- sp
 
 */
 
