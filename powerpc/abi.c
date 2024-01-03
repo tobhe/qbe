@@ -47,7 +47,7 @@ static int fpreg[10] = {F1, F2, F3, F4, F5, F6, F7, F8};
  *        |   |    |  ` fp regs returned    (0..2)
  *        |   |    ` gp regs passed         (0..8)
  *        |    ` fp regs passed             (0..8)
- *        ` env pointer passed in R11       (0..1)
+ *        ` env pointer passed in R31       (0..1)
  */
 
 bits
@@ -75,14 +75,14 @@ bits
 powerpc_argregs(Ref r, int p[2])
 {
 	bits b;
-	int ngp, nfp, r11;
+	int ngp, nfp, r31;
 
 	assert(rtype(r) == RCall);
 	ngp = (r.val >> 4) & 15;
 	nfp = (r.val >> 8) & 15;
-	r11 = (r.val >> 12) & 1;
+	r31 = (r.val >> 12) & 1;
 	if (p) {
-		p[0] = ngp + r11;
+		p[0] = ngp + r31;
 		p[1] = nfp;
 	}
 	b = 0;
@@ -90,7 +90,7 @@ powerpc_argregs(Ref r, int p[2])
 		b |= BIT(R3+ngp);
 	while (nfp--)
 		b |= BIT(F1+nfp);
-	return b | ((bits)r11 << R11);
+	return b | ((bits)r31 << R31);
 }
 
 static int
