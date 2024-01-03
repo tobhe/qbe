@@ -120,16 +120,17 @@ static struct {
 	{ Ouwtof,  Ka, "fcvt%k.wu %=, %0" },
 	{ Osltof,  Ka, "fcvt%k.l %=, %0" },
 	{ Oultof,  Ka, "fcvt%k.lu %=, %0" },
+	
 	{ Ocast,   Kw, "fmv.x.w %=, %0" },
 	{ Ocast,   Kl, "fmv.x.d %=, %0" },
 	{ Ocast,   Ks, "fmv.w.x %=, %0" },
 	{ Ocast,   Kd, "fmv.d.x %=, %0" },
 
-	{ Ocopy,   Ki, "mv %=, %0" },
-	{ Ocopy,   Ka, "fmr%k %=, %0" },
+	{ Ocopy,   Ki, "mr %=, %0" },
+	{ Ocopy,   Ka, "fmr %=, %0" },
 	
-	{ Oswap,   Ki, "mv %?, %0\n\tmv %0, %1\n\tmv %1, %?" },
-	{ Oswap,   Ka, "fmv%k %?, %0\n\tfmv%k %0, %1\n\tfmv%k %1, %?" },
+	{ Oswap,   Ki, "mr %?, %0\n\tmr %0, %1\n\tmr %1, %?" },
+	{ Oswap,   Ka, "fmr%k %?, %0\n\tfmr%k %0, %1\n\tfmr%k %1, %?" },
 	{ Oreqz,   Ki, "seqz %=, %0" },
 	{ Ornez,   Ki, "snez %=, %0" },
 	{ Ocall,   Kw, "jalr %0" },
@@ -449,7 +450,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 	case Osalloc:
 		emitf("sub sp, sp, %0", i, fn, f);
 		if (!req(i->to, R))
-			emitf("mv %=, sp", i, fn, f);
+			emitf("mr %=, sp", i, fn, f);
 		break;
 	case Odbgloc:
 		emitdbgloc(i->arg[0].val, i->arg[1].val, f);
