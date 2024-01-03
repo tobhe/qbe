@@ -106,7 +106,13 @@ static struct {
 	{ Oextuh,  Ki, "zext.h %=, %0" },
 	{ Oextsw,  Kl, "sext.w %=, %0" },
 	{ Oextuw,  Kl, "zext.w %=, %0" },
-	{ Otruncd, Ks, "fcvt.s.d %=, %0" },
+	
+	/* fcvt.s.d means from double to single */
+	{ Otruncd, Ks, "frsp %=, %0" },
+	
+	/*
+	 * Conversion does not seem necessary for other types
+	 * should just work with load
 	{ Oexts,   Kd, "fcvt.d.s %=, %0" },
 	{ Ostosi,  Kw, "fcvt.w.s %=, %0, rtz" },
 	{ Ostosi,  Kl, "fcvt.l.s %=, %0, rtz" },
@@ -125,6 +131,7 @@ static struct {
 	{ Ocast,   Kl, "fmv.x.d %=, %0" },
 	{ Ocast,   Ks, "fmv.w.x %=, %0" },
 	{ Ocast,   Kd, "fmv.d.x %=, %0" },
+	*/
 
 	{ Ocopy,   Ki, "mr %=, %0" },
 	{ Ocopy,   Ka, "fmr %=, %0" },
