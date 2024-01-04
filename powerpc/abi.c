@@ -558,31 +558,6 @@ selpar(Fn *fn, Ins *i0, Ins *i1)
 	};
 }
 
-static void
-selvaarg(Fn *fn, Ins *i)
-{
-	Ref loc, newloc;
-
-	loc = newtmp("abi", Kl, fn);
-	newloc = newtmp("abi", Kl, fn);
-	emit(Ostorel, Kw, R, newloc, i->arg[0]);
-	emit(Oadd, Kl, newloc, loc, getcon(8, fn));
-	emit(Oload, i->cls, i->to, loc, R);
-	emit(Oload, Kl, loc, i->arg[0], R);
-}
-
-static void
-selvastart(Fn *fn, Params p, Ref ap)
-{
-	Ref rsave;
-	int s;
-
-	rsave = newtmp("abi", Kl, fn);
-	emit(Ostorel, Kw, R, rsave, ap);
-	s = p.stk > 2 + 8 * fn->vararg ? p.stk : 2 + p.ngp;
-	emit(Oaddr, Kl, rsave, SLOT(-s), R);
-}
-
 void
 powerpc_abi(Fn *fn)
 {
@@ -628,12 +603,6 @@ powerpc_abi(Fn *fn)
 						break;
 				selcall(fn, i0, i, &il);
 				i = i0;
-				break;
-			case Ovastart:
-				selvastart(fn, p, i->arg[0]);
-				break;
-			case Ovaarg:
-				selvaarg(fn, i);
 				break;
 			case Oarg:
 			case Oargc:
