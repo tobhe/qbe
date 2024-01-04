@@ -153,13 +153,13 @@ rname(int r)
 	static char buf[4];
 
 	if (R0 <= r && r <= R12) {
-		sprintf(buf, "%d", r - R0);
+		sprintf(buf, "%%r%d", r - R0);
 	}
 	else if (R14 <= r && r <= R31) {
-		sprintf(buf, "%d", r - R0 + 1);
+		sprintf(buf, "%%r%d", r - R0 + 1);
 	}
 	else if (F0 <= r && r <= F31) {
-		sprintf(buf, "%d", r - F0);
+		sprintf(buf, "%%f%d", r - F0);
 	}
 	return buf;
 }
@@ -508,9 +508,9 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	emitfnlnk(fn->name, &fn->lnk, f);
 
 	/* Adjust SP + Back chain */
-	fprintf(f, "\tstwu 1, -32(1)\n");
-	fprintf(f, "\tstw 31, 12(1)\n");
-	fprintf(f, "\tmr 31, 1\n");
+	fprintf(f, "\tstwu %%r1, -32(%%r1)\n");
+	fprintf(f, "\tstw %%r31, 12(%%r1)\n");
+	fprintf(f, "\tmr %%r31, %%r1\n");
 
 	for (lbl=0, b=fn->start; b; b=b->link) {
 		if (lbl || b->npred > 1)
@@ -527,13 +527,13 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			/* TODO change 9 to actal register*/
 			// fprintf(f, "\tmr 3,9\n");
 
-			fprintf(f, "\taddi 11,31,32\n");
+			fprintf(f, "\taddi %%r11,%%r31,32\n");
 
 			/* Calculate environment pointer */
-			fprintf(f, "\tlwz 31,12(1)\n");
+			fprintf(f, "\tlwz %%r31,12(%%r1)\n");
 
 			/* Reset stack pointer */
-			fprintf(f, "\tmr 1,11\n");
+			fprintf(f, "\tmr %%r1,%%r11\n");
 
 			/* return */
 			fprintf(f, "\tblr\n");
