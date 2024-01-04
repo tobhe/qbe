@@ -5,6 +5,26 @@ enum {
 	Ka = -2, /* matches all classes */
 };
 
+#define CMP(X) \
+	X(Cieq,       "eq") \
+	X(Cine,       "ne") \
+	X(Cisge,      "ge") \
+	X(Cisgt,      "gt") \
+	X(Cisle,      "le") \
+	X(Cislt,      "lt") \
+	X(Ciuge,      "cs") \
+	X(Ciugt,      "hi") \
+	X(Ciule,      "ls") \
+	X(Ciult,      "cc") \
+	X(NCmpI+Cfeq, "eq") \
+	X(NCmpI+Cfge, "ge") \
+	X(NCmpI+Cfgt, "gt") \
+	X(NCmpI+Cfle, "ls") \
+	X(NCmpI+Cflt, "mi") \
+	X(NCmpI+Cfne, "ne") \
+	X(NCmpI+Cfo,  "vc") \
+	X(NCmpI+Cfuo, "vs")
+
 /* Instruction format strings:
  * %k  is used to set the class of the instruction,
  *     it'll expand to
@@ -144,6 +164,12 @@ static struct {
 	{ Ornez,   Ki, "snez %=, %0" },
 	*/
 	{ Ocall,   Kw, "jalr %0" },
+
+#define X(c, str) \
+	{ Oflag+c, Ki, "#lol: " str },
+	CMP(X)
+#undef X
+
 	{ NOp, 0, 0 }
 };
 
