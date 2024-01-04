@@ -183,10 +183,13 @@ sel(Ins i, Fn *fn)
 		fixarg(&i0->arg[0], Kl, i0, fn);
 		return;
 	}
+	/*
+	 * Outcommented to try compare instruction
 	if (iscmp(i.op, &ck, &cc)) {
 		selcmp(i, ck, cc, fn);
 		return;
 	}
+	*/
 	if (i.op != Onop) {
 		emiti(i);
 		i0 = curi; /* fixarg() can change curi */

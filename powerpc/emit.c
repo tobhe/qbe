@@ -138,8 +138,11 @@ static struct {
 	
 	{ Oswap,   Ki, "mr %?, %0\n\tmr %0, %1\n\tmr %1, %?" },
 	{ Oswap,   Ka, "fmr%k %?, %0\n\tfmr%k %0, %1\n\tfmr%k %1, %?" },
+	/*
+	 * These are not architecture specific and come from isel() 
 	{ Oreqz,   Ki, "seqz %=, %0" },
 	{ Ornez,   Ki, "snez %=, %0" },
+	*/
 	{ Ocall,   Kw, "jalr %0" },
 	{ NOp, 0, 0 }
 };
