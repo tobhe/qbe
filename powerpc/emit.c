@@ -541,6 +541,12 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			break;
 		case Jjmp:
 		Jmp:
+			if (b->s1 != b->link)
+				fprintf(f, "\tb\t%s%d\n", T.asloc, id0+b->s1->id);
+			else
+				lbl=0;
+			break;
+		default:
 			break;
 		}
 	}
