@@ -50,7 +50,7 @@ config.h:
 		*riscv64*)                             \
 			echo "#define Deftgt T_rv64";  \
 			;;                             \
-		*powerpc*)                             \
+		*macppc*|*powerpc*)                             \
 			echo "#define Deftgt T_powerpc";\
 	l		;;                             \
 		*)                                     \
