@@ -1,0 +1,21 @@
+export
+function w $f1() {
+@start
+	%x =w div 2, 8
+	ret %x
+}
+
+export
+function w $f2() {
+@start
+	%x =w rem 1, 7
+	ret %x
+}
+
+# TODO
+
+# >>> driver
+# extern int f1();
+# extern int f2();
+# int main() { return 0; }
+# <<<
