@@ -93,82 +93,53 @@ negate(Ref *pr, Fn *fn)
 	*pr = r;
 }
 
-static void
-selcmp(Ins i, int k, int op, Fn *fn)
+static int
+selcmp(Ref arg[2], int k, Fn *fn)
 {
-	Ins *icmp;
-	Ref r, r0, r1;
-	int sign, swap, neg;
+	Ref r, *iarg;
+	Con *c;
+	int swap, cmp, fix;
+	int64_t n;
 
-	switch (op) {
-	case Cieq:
-		r = newtmp("isel", k, fn);
-		emit(Oreqz, i.cls, i.to, r, R);
-		emit(Oxor, k, r, i.arg[0], i.arg[1]);
-		icmp = curi;
-		fixarg(&icmp->arg[0], k, icmp, fn);
-		fixarg(&icmp->arg[1], k, icmp, fn);
-		return;
-	case Cine:
-		r = newtmp("isel", k, fn);
-		emit(Ornez, i.cls, i.to, r, R);
-		emit(Oxor, k, r, i.arg[0], i.arg[1]);
-		icmp = curi;
-		fixarg(&icmp->arg[0], k, icmp, fn);
-		fixarg(&icmp->arg[1], k, icmp, fn);
-		return;
-	case Cisge: sign = 1, swap = 0, neg = 1; break;
-	case Cisgt: sign = 1, swap = 1, neg = 0; break;
-	case Cisle: sign = 1, swap = 1, neg = 1; break;
-	case Cislt: sign = 1, swap = 0, neg = 0; break;
-	case Ciuge: sign = 0, swap = 0, neg = 1; break;
-	case Ciugt: sign = 0, swap = 1, neg = 0; break;
-	case Ciule: sign = 0, swap = 1, neg = 1; break;
-	case Ciult: sign = 0, swap = 0, neg = 0; break;
-	case NCmpI+Cfeq:
-	case NCmpI+Cfge:
-	case NCmpI+Cfgt:
-	case NCmpI+Cfle:
-	case NCmpI+Cflt:
-		swap = 0, neg = 0;
-		break;
-	case NCmpI+Cfuo:
-		negate(&i.to, fn);
-		/* fall through */
-	case NCmpI+Cfo:
-		r0 = newtmp("isel", i.cls, fn);
-		r1 = newtmp("isel", i.cls, fn);
-		emit(Oand, i.cls, i.to, r0, r1);
-		op = KWIDE(k) ? Oceqd : Oceqs;
-		emit(op, i.cls, r0, i.arg[0], i.arg[0]);
-		icmp = curi;
-		fixarg(&icmp->arg[0], k, icmp, fn);
-		fixarg(&icmp->arg[1], k, icmp, fn);
-		emit(op, i.cls, r1, i.arg[1], i.arg[1]);
-		icmp = curi;
-		fixarg(&icmp->arg[0], k, icmp, fn);
-		fixarg(&icmp->arg[1], k, icmp, fn);
-		return;
-	case NCmpI+Cfne:
-		swap = 0, neg = 1;
-		i.op = KWIDE(k) ? Oceqd : Oceqs;
-		break;
-	default:
-		assert(0 && "unknown comparison");
+	if (KBASE(k) == 1) {
+		emit(Oafcmp, k, R, arg[0], arg[1]);
+		iarg = curi->arg;
+		fixarg(&iarg[0], k, 0, fn);
+		fixarg(&iarg[1], k, 0, fn);
+		return 0;
 	}
-	if (op < NCmpI)
-		i.op = sign ? Ocsltl : Ocultl;
+	swap = rtype(arg[0]) == RCon;
 	if (swap) {
-		r = i.arg[0];
-		i.arg[0] = i.arg[1];
-		i.arg[1] = r;
+		r = arg[1];
+		arg[1] = arg[0];
+		arg[0] = r;
 	}
-	if (neg)
-		negate(&i.to, fn);
-	emiti(i);
-	icmp = curi;
-	fixarg(&icmp->arg[0], k, icmp, fn);
-	fixarg(&icmp->arg[1], k, icmp, fn);
+	fix = 1;
+	cmp = Oacmp;
+	r = arg[1];
+	if (rtype(r) == RCon) {
+		c = &fn->con[r.val];
+		switch (imm(c, k, &n)) {
+		default:
+			break;
+		case Iplo12:
+		case Iphi12:
+			fix = 0;
+			break;
+		case Inlo12:
+		case Inhi12:
+			cmp = Oacmn;
+			r = getcon(n, fn);
+			fix = 0;
+			break;
+		}
+	}
+	emit(cmp, k, R, arg[0], r);
+	iarg = curi->arg;
+	fixarg(&iarg[0], k, 0, fn);
+	if (fix)
+		fixarg(&iarg[1], k, 0, fn);
+	return swap;
 }
 
 static void
@@ -183,13 +154,16 @@ sel(Ins i, Fn *fn)
 		fixarg(&i0->arg[0], Kl, i0, fn);
 		return;
 	}
-	/*
-	 * Outcommented to try compare instruction
+	/* Taken from ARM64 */
 	if (iscmp(i.op, &ck, &cc)) {
-		selcmp(i, ck, cc, fn);
+		emit(Oflag, i.cls, i.to, R, R);
+		i0 = curi;
+		if (selcmp(i.arg, ck, fn))
+			i0->op += cmpop(cc);
+		else
+			i0->op += cc;
 		return;
 	}
-	*/
 	if (i.op != Onop) {
 		emiti(i);
 		i0 = curi; /* fixarg() can change curi */
