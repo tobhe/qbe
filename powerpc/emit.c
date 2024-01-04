@@ -211,8 +211,10 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 				fputs("ft11", f);
 			break;
 		case 'k':
+#if 0
 			if (i->cls != Kl)
 				fputc(clschr[i->cls], f);
+#endif
 			break;
 		case '=':
 		case '0':
@@ -504,6 +506,8 @@ powerpc_emitfn(Fn *fn, FILE *f)
 
 	/* Adjust SP + Back chain */
 	fprintf(f, "\tstwu 1, -32(1)\n");
+	fprintf(f, "\tstw 31, 12(1)\n");
+	fprintf(f, "\tmr 31, 1\n");
 
 	for (lbl=0, b=fn->start; b; b=b->link) {
 		if (lbl || b->npred > 1)
@@ -518,11 +522,12 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		case Jret0:
 			/* Load return value in return register */
 			/* TODO change 9 to actal register*/
-			fprintf(f, "\tmr 3,9\n");
+			// fprintf(f, "\tmr 3,9\n");
+
+			fprintf(f, "\taddi 11,31,32\n");
 
 			/* Calculate environment pointer */
-			fprintf(f, "\taddi 11,31,32\n");
-			fprintf(f, "\tlwz 31,-4(11)\n");
+			fprintf(f, "\tlwz 31,12(1)\n");
 
 			/* Reset stack pointer */
 			fprintf(f, "\tmr 1,11\n");
@@ -530,6 +535,9 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			/* return */
 			fprintf(f, "\tblr\n");
 
+			break;
+		case Jjmp:
+		Jmp:
 			break;
 		}
 	}
