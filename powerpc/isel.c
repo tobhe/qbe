@@ -1,5 +1,41 @@
 #include "all.h"
 
+enum Imm {
+	Iother,
+	Iplo12,
+	Iphi12,
+	Iplo24,
+	Inlo12,
+	Inhi12,
+	Inlo24
+};
+
+static enum Imm
+imm(Con *c, int k, int64_t *pn)
+{
+	int64_t n;
+	int i;
+
+	if (c->type != CBits)
+		return Iother;
+	n = c->bits.i;
+	if (k == Kw)
+		n = (int32_t)n;
+	i = Iplo12;
+	if (n < 0) {
+		i = Inlo12;
+		n = -n;
+	}
+	*pn = n;
+	if ((n & 0x000fff) == n)
+		return i;
+	if ((n & 0xfff000) == n)
+		return i + 1;
+	if ((n & 0xffffff) == n)
+		return i + 2;
+	return Iother;
+}
+
 static int
 memarg(Ref *r, int op, Ins *i)
 {
