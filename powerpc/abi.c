@@ -232,7 +232,7 @@ selret(Blk *b, Fn *fn)
 	} else {
 		k = j - Jretw;
 		if (KBASE(k) == 0) {
-			emit(Ocopy, k, TMP(R0), r, R);
+			emit(Ocopy, k, TMP(R3), r, R);
 			cty = 1;
 		} else {
 			emit(Ocopy, k, TMP(F0), r, R);
@@ -377,7 +377,7 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 			 * followed by copies from regs,
 			 * so we emit a dummy
 			 */
-			emit(Ocopy, Kw, R, TMP(R0), R);
+			emit(Ocopy, Kw, R, TMP(R3), R);
 		else {
 			sttmps(tmp, cr.nreg, &cr, i1->to, fn);
 			for (j=0; j<cr.nreg; j++) {
@@ -386,7 +386,7 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 			}
 		}
 	} else if (KBASE(i1->cls) == 0) {
-		emit(Ocopy, i1->cls, i1->to, TMP(R0), R);
+		emit(Ocopy, i1->cls, i1->to, TMP(R3), R);
 		cty |= 1;
 	} else {
 		emit(Ocopy, i1->cls, i1->to, TMP(F0), R);
@@ -397,7 +397,7 @@ selcall(Fn *fn, Ins *i0, Ins *i1, Insl **ilp)
 
 	if (cr.class & Cptr)
 		/* struct return argument */
-		emit(Ocopy, Kl, TMP(R0), i1->to, R);
+		emit(Ocopy, Kl, TMP(R3), i1->to, R);
 
 	/* move arguments into registers */
 	for (i=i0, c=ca; i<i1; i++, c++) {
@@ -492,7 +492,7 @@ selpar(Fn *fn, Ins *i0, Ins *i1)
 		typclass(&cr, &typ[fn->retty], 1, gpreg, fpreg);
 		if (cr.class & Cptr) {
 			fn->retr = newtmp("abi", Kl, fn);
-			emit(Ocopy, Kl, fn->retr, TMP(R0), R);
+			emit(Ocopy, Kl, fn->retr, TMP(R3), R);
 		}
 	}
 
