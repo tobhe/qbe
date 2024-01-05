@@ -453,6 +453,13 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		break;
 	case Onop:
 		break;
+	case Oadd:
+		/* If arg1 is a constant emit addi */
+		if (isreg(i->arg[1]))
+			goto Table;
+
+		emitf("addi %=, %0, %1", i, fn, f);
+		break;
 	case Oaddr:
 		assert(rtype(i->arg[0]) == RSlot);
 		rn = rname(i->to.val);
