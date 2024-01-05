@@ -475,7 +475,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			|| con->sym.type != SGlo
 			|| con->bits.i)
 				goto Invalid;
-			fprintf(f, "\tcall %s\n", str(con->sym.id));
+			fprintf(f, "\tbl %s\n", str(con->sym.id));
 			break;
 		case RTmp:
 			emitf("jalr %0", i, fn, f);
