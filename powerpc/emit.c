@@ -483,6 +483,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			|| con->bits.i)
 				goto Invalid;
 			fprintf(f, "\tbl %s\n", str(con->sym.id));
+			fprintf(f, "\tlwz %%r0, 20(%%r1)\n");
 			break;
 		case RTmp:
 			emitf("jalr %0", i, fn, f);
@@ -541,8 +542,10 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	emitfnlnk(fn->name, &fn->lnk, f);
 
 	/* Adjust SP + Back chain */
+	fprintf(f, "\tmflr %%r0\n");
 	fprintf(f, "\tstwu %%r1, -32(%%r1)\n");
 	fprintf(f, "\tstw %%r31, 12(%%r1)\n");
+	fprintf(f, "\tstw %%r0, 20(%%r1)\n");
 	fprintf(f, "\tmr %%r31, %%r1\n");
 
 	for (lbl=0, b=fn->start; b; b=b->link) {
@@ -567,6 +570,8 @@ powerpc_emitfn(Fn *fn, FILE *f)
 
 			/* Reset stack pointer */
 			fprintf(f, "\tmr %%r1,%%r11\n");
+
+			fprintf(f, "\tmtlr %%r0\n");
 
 			/* return */
 			fprintf(f, "\tblr\n");
