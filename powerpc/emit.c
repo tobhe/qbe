@@ -453,13 +453,44 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		break;
 	case Onop:
 		break;
+	/* Immediates */
 	case Oadd:
-		/* If arg1 is a constant emit addi */
 		if (isreg(i->arg[1]))
 			goto Table;
 
 		emitf("addi %=, %0, %1", i, fn, f);
 		break;
+	case Osub:
+		if (isreg(i->arg[1]))
+			goto Table;
+
+		emitf("si %=, %0, %1", i, fn, f);
+		break;
+	case Oand:
+		if (isreg(i->arg[1]))
+			goto Table;
+
+		emitf("andi %=, %0, %1", i, fn, f);
+		break;
+	case Oor:
+		if (isreg(i->arg[1]))
+			goto Table;
+
+		emitf("ori %=, %0, %1", i, fn, f);
+		break;
+	case Omul:
+		if (isreg(i->arg[1]))
+			goto Table;
+
+		emitf("mulli %=, %0, %1", i, fn, f);
+		break;
+	case Oxor:
+		if (isreg(i->arg[1]))
+			goto Table;
+
+		emitf("xori %=, %0, %1", i, fn, f);
+		break;
+	/* End Immediates */
 	case Oaddr:
 		assert(rtype(i->arg[0]) == RSlot);
 		rn = rname(i->to.val);
