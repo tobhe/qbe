@@ -539,26 +539,28 @@ emitins(Ins *i, Fn *fn, FILE *f)
 
   Stack-frame layout:
 
-  +=============+
-  |   FP save   |
-  |    area     |
+  +=============+ <- sp
+  | back chain  |
   +-------------+
+  |  link area  |
+  +-------------+
+  |   spill     |
+  +-------------+ 
+  |   locals    |
+  +-------------+ 
+  |   padding   |
+  +-------------+ 
   |   GP save   |
   |    area     |
   +-------------+
-  | callee-save |
-  |  registers  |
-  +-------------+
-  |    ...      |
-  |   locals    |
-  |    ...      |
-  +-------------+ 
-  |    ...      |
-  | spill slots |
-  |    ...      |
+  |   FP save   |
+  |    area     |
+  +=============+ <- old sp
+  | back chain  |
   +-------------+ 
   |   LR save   |
-  +=============+ <- sp
+  +-------------+ 
+  :     ...     :
 
 */
 
