@@ -472,7 +472,6 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			|| con->bits.i)
 				goto Invalid;
 			fprintf(f, "\tbl %s\n", str(con->sym.id));
-			fprintf(f, "\tlwz %%r0, 20(%%r1)\n");
 			break;
 		case RTmp:
 			emitf("jalr %0", i, fn, f);
@@ -569,13 +568,14 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		case Jret0:
 			/* Load return value in return register */
 			/* TODO change 9 to actal register*/
-			fprintf(f, "\taddi %%r11,%%r31,%zu\n", fs);
+
+			fprintf(f, "\tlwz %%r0, 20(%%r1)\n");
 
 			/* Calculate environment pointer */
 			fprintf(f, "\tlwz %%r31,%zu(%%r1)\n", fs-4);
 
 			/* Reset stack pointer */
-			fprintf(f, "\tmr %%r1,%%r11\n");
+			fprintf(f, "\taddi %%r1,%%r1,%zu\n", fs);
 
 			fprintf(f, "\tmtlr %%r0\n");
 
