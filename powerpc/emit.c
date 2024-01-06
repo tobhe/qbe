@@ -176,7 +176,7 @@ static struct {
 static char *
 rname(int r)
 {
-	static char buf[4];
+	static char buf[5];
 
 	if (R0 <= r && r <= R12) {
 		sprintf(buf, "%%r%d", r - R0);
