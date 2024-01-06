@@ -57,9 +57,9 @@ static struct {
 	{ Oudiv,   Ki, "div%ku %=, %0, %1" },
 	{ Odiv,    Ka, "fdiv%k %=, %0, %1" },
 	
-	/* Powerpc does not have a rem instruction. Can we do the same as arm64? div and msub? */
-	{ Orem,    Ki, "div%k %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
-	{ Ourem,   Ki, "div%ku %?, %0, %1\n\tmsub\t%=, %?, %1, %0" },
+	/* PowerPC Microprocessor Family: The Programming Environments 8-58 */
+	{ Orem,    Ki, "divw %?, %0, %1\n\tmullw %?, %?, %1\n\tsubf %=, %?, %0" },
+	{ Ourem,   Ki, "divwu %?, %0, %1\n\tmullw %?, %?, %1\n\tsubf %=, %?, %0" },
 
 	/* Here %k could be w for word and d for double word */
 	{ Omul,    Ki, "mull%k %=, %0, %1" },
@@ -237,9 +237,9 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 			die("invalid escape");
 		case '?':
 			if (KBASE(k) == 0)
-				fputs("t6", f);
+				fputs("%r6", f);
 			else
-				fputs("ft11", f);
+				fputs("%f11", f);
 			break;
 		case 'k':
 			break;
