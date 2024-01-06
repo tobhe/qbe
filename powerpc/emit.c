@@ -287,7 +287,7 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 					 * temporary register in which to
 					 * load the address
 					 */
-					fprintf(f, ", t6");
+					fprintf(f, ", %%r6");
 				}
 				break;
 			case RSlot:
