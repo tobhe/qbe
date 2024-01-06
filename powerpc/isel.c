@@ -201,9 +201,37 @@ sel(Ins i, Fn *fn)
 static void
 seljmp(Blk *b, Fn *fn)
 {
-	/* TODO: replace cmp+jnz with beq/bne/blt[u]/bge[u] */
-	if (b->jmp.type == Jjnz)
-		fixarg(&b->jmp.arg, Kw, 0, fn);
+	Ref r;
+	Ins *i, *ir;
+	int ck, cc, use;
+
+	if (b->jmp.type == Jret0
+	|| b->jmp.type == Jjmp
+	|| b->jmp.type == Jhlt)
+		return;
+	assert(b->jmp.type == Jjnz);
+	r = b->jmp.arg;
+	use = -1;
+	b->jmp.arg = R;
+	ir = 0;
+	i = &b->ins[b->nins];
+	while (i > b->ins)
+		if (req((--i)->to, r)) {
+			use = fn->tmp[r.val].nuse;
+			ir = i;
+			break;
+		}
+	if (ir && use == 1
+	&& iscmp(ir->op, &ck, &cc)) {
+		if (selcmp(ir->arg, ck, fn))
+			cc = cmpop(cc);
+		b->jmp.type = Jjf + cc;
+		*ir = (Ins){.op = Onop};
+	}
+	else {
+		selcmp((Ref[]){r, CON_Z}, Kw, fn);
+		b->jmp.type = Jjfine;
+	}
 }
 
 void

@@ -522,9 +522,14 @@ emitins(Ins *i, Fn *fn, FILE *f)
 void
 powerpc_emitfn(Fn *fn, FILE *f)
 {
+	static char *ctoa[] = {
+	#define X(c, s) [c] = s,
+		CMP(X)
+	#undef X
+	};
 	static int id0;
-	int lbl;
-	Blk *b;
+	int lbl, c;
+	Blk *b, *t;
 	Ins *i;
 
 	emitfnlnk(fn->name, &fn->lnk, f);
@@ -568,16 +573,28 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		case Jjmp:
 		Jmp:
 			if (b->s1 != b->link)
-				fprintf(f, "\tb\t%s%d\n", T.asloc, id0+b->s1->id);
+				fprintf(f, "\tb\t%s%d\n", T.asloc,
+				    id0+b->s1->id);
 			else
 				lbl=0;
 			break;
 		default:
-			break;
+			c = b->jmp.type - Jjf;
+			if (c < 0 || c > NCmp)
+				die("unhandled jump %d", b->jmp.type);
+			if (b->link == b->s2) {
+				t = b->s1;
+				b->s1 = b->s2;
+				b->s2 = t;
+			} else
+				c = cmpneg(c);
+			fprintf(f,
+				"\tb%s\t%s%d\n",
+				ctoa[c], T.asloc, id0+b->s2->id
+			);
+			goto Jmp;
 		}
 	}
-
-
 	id0 += fn->nblk;
 	elf_emitfnfin(fn->name, f);
 }
