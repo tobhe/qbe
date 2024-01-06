@@ -5,6 +5,9 @@ enum {
 	Ka = -2, /* matches all classes */
 };
 
+#define FRAME_ALIGN	16u
+#define ROUNDUP(x) (((x) + (FRAME_ALIGN - 1u)) & ~(FRAME_ALIGN - 1u))
+
 #define CMP(X) \
 	X(Cieq,       "eq") \
 	X(Cine,       "ne") \
@@ -528,17 +531,30 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	#undef X
 	};
 	static int id0;
-	int lbl, c;
+	int lbl, c, off, *r;
 	Blk *b, *t;
 	Ins *i;
+	size_t fs;
 
 	emitfnlnk(fn->name, &fn->lnk, f);
 
+	fprintf(stderr, "fn->slot=%d\n", fn->slot);
+	for (r=powerpc_rclob, off=0; *r>=0; r++) {
+		if (fn->reg & BIT(*r))
+			fprintf(stderr, "found 1\n");
+	}
+
+	fs = ROUNDUP(12);
+
 	/* Adjust SP + Back chain */
+	fprintf(f, "\tstwu %%r1, -%zu(%%r1)\n", fs);
+
+	/* Save link register */
 	fprintf(f, "\tmflr %%r0\n");
-	fprintf(f, "\tstwu %%r1, -32(%%r1)\n");
-	fprintf(f, "\tstw %%r31, 12(%%r1)\n");
-	fprintf(f, "\tstw %%r0, 20(%%r1)\n");
+	fprintf(f, "\tstw %%r0, %zu(%%r1)\n", fs+4);
+
+	/* Save env */
+	fprintf(f, "\tstw %%r31, %zu(%%r1)\n", fs-4);
 	fprintf(f, "\tmr %%r31, %%r1\n");
 
 	for (lbl=0, b=fn->start; b; b=b->link) {
@@ -554,12 +570,10 @@ powerpc_emitfn(Fn *fn, FILE *f)
 		case Jret0:
 			/* Load return value in return register */
 			/* TODO change 9 to actal register*/
-			// fprintf(f, "\tmr 3,9\n");
-
-			fprintf(f, "\taddi %%r11,%%r31,32\n");
+			fprintf(f, "\taddi %%r11,%%r31,%zu\n", fs);
 
 			/* Calculate environment pointer */
-			fprintf(f, "\tlwz %%r31,12(%%r1)\n");
+			fprintf(f, "\tlwz %%r31,%zu(%%r1)\n", fs-4);
 
 			/* Reset stack pointer */
 			fprintf(f, "\tmr %%r1,%%r11\n");
