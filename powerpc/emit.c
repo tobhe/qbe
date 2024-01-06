@@ -90,8 +90,8 @@ static struct {
 	--> Check ARM64 which also seems to only have compare instructions
 	```
 	*/
-	{ Oacmp,   Ki, "cmp %0, %1" },
-	{ Oafcmp,  Ka, "fcmpu %0, %1" },
+	{ Oacmp,   Ki, "cmpw 7, %0, %1" },
+	{ Oafcmp,  Ka, "fcmpu 7, %0, %1" },
 
 	/*
 	Store
