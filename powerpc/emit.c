@@ -215,7 +215,6 @@ emitaddr(Con *c, FILE *f)
 static void
 emitf(char *s, Ins *i, Fn *fn, FILE *f)
 {
-	static char clschr[] = {'w', 'l', 's', 'd'};
 	Ref r;
 	int k, c;
 	Con *pc;
@@ -240,10 +239,6 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 				fputs("ft11", f);
 			break;
 		case 'k':
-#if 0
-			if (i->cls != Kl)
-				fputc(clschr[i->cls], f);
-#endif
 			break;
 		case '=':
 		case '0':
@@ -349,38 +344,6 @@ loadcon(Con *c, int r, int k, FILE *f)
 }
 
 static void
-fixmem(Ref *pr, Fn *fn, FILE *f)
-{
-#if 1
-	(void) pr;
-	(void) fn;
-	(void) f;
-#else
-	Ref r;
-	int64_t s;
-	Con *c;
-
-	r = *pr;
-	if (rtype(r) == RCon) {
-		c = &fn->con[r.val];
-		if (c->type == CAddr)
-		if (c->sym.type == SThr) {
-			loadcon(c, T6, Kl, f);
-			*pr = TMP(T6);
-		}
-	}
-	if (rtype(r) == RSlot) {
-		s = slot(r, fn);
-		if (s < -2048 || s > 2047) {
-			fprintf(f, "\tli t6, %"PRId64"\n", s);
-			fprintf(f, "\tadd t6, fp, t6\n");
-			*pr = TMP(T6);
-		}
-	}
-#endif
-}
-
-static void
 emitins(Ins *i, Fn *fn, FILE *f)
 {
 	int o;
@@ -390,12 +353,6 @@ emitins(Ins *i, Fn *fn, FILE *f)
 
 	switch (i->op) {
 	default:
-#if 0
-		if (isload(i->op))
-			fixmem(&i->arg[0], fn, f);
-		else if (isstore(i->op))
-			fixmem(&i->arg[1], fn, f);
-#endif
 	Table:
 		/* most instructions are just pulled out of
 		 * the table omap[], some special cases are
@@ -432,7 +389,6 @@ emitins(Ins *i, Fn *fn, FILE *f)
 				case Ks: i->op = Ostores; break;
 				case Kd: i->op = Ostored; break;
 				}
-				fixmem(&i->arg[1], fn, f);
 				goto Table;
 			}
 			break;
@@ -444,7 +400,6 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			break;
 		case RSlot:
 			i->op = Oload;
-			fixmem(&i->arg[0], fn, f);
 			goto Table;
 		default:
 			assert(isreg(i->arg[0]));
@@ -625,124 +580,4 @@ powerpc_emitfn(Fn *fn, FILE *f)
 
 	id0 += fn->nblk;
 	elf_emitfnfin(fn->name, f);
-#if 0
-	static int id0;
-	int lbl, neg, off, frame, *pr, r;
-	Blk *b, *s;
-	Ins *i;
-
-
-	if (fn->vararg) {
-		/* TODO: only need space for registers
-		 * unused by named arguments
-		 */
-		fprintf(f, "\tadd sp, sp, -64\n");
-		for (r=R3; r<=R10; r++)
-			fprintf(f,
-				"\tsd %s, %d(sp)\n",
-				rname(r), 8 * (r - R0)
-			);
-	}
-	fprintf(f, "\tsd ra, -8(sp)\n");
-	fprintf(f, "\tadd fp, sp, -16\n");
-
-	frame = (16 + 4 * fn->slot + 15) & ~15;
-	for (pr=powerpc_rclob; *pr>=0; pr++) {
-		if (fn->reg & BIT(*pr))
-			frame += 8;
-	}
-	frame = (frame + 15) & ~15;
-
-	if (frame <= 2048)
-		fprintf(f,
-			"\tadd sp, sp, -%d\n",
-			frame
-		);
-	else
-		fprintf(f,
-			"\tli t6, %d\n"
-			"\tsub sp, sp, t6\n",
-			frame
-		);
-	for (pr=powerpc_rclob, off=0; *pr>=0; pr++) {
-		if (fn->reg & BIT(*pr)) {
-			fprintf(f,
-				"\t%s %s, %d(sp)\n",
-				*pr < F0 ? "sd" : "fsd",
-				rname(*pr), off
-			);
-			off += 8;
-		}
-	}
-
-	for (lbl=0, b=fn->start; b; b=b->link) {
-		if (lbl || b->npred > 1)
-			fprintf(f, ".L%d:\n", id0+b->id);
-		for (i=b->ins; i!=&b->ins[b->nins]; i++)
-			emitins(i, fn, f);
-		lbl = 1;
-		switch (b->jmp.type) {
-		case Jhlt:
-			fprintf(f, "\tebreak\n");
-			break;
-		case Jret0:
-			if (fn->dynalloc) {
-				if (frame - 16 <= 2048)
-					fprintf(f,
-						"\tadd sp, fp, -%d\n",
-						frame - 16
-					);
-				else
-					fprintf(f,
-						"\tli t6, %d\n"
-						"\tsub sp, fp, t6\n",
-						frame - 16
-					);
-			}
-			for (pr=powerpc_rclob, off=0; *pr>=0; pr++) {
-				if (fn->reg & BIT(*pr)) {
-					fprintf(f,
-						"\t%s %s, %d(sp)\n",
-						*pr < FT0 ? "ld" : "fld",
-						rname(*pr), off
-					);
-					off += 8;
-				}
-			}
-			fprintf(f,
-				"\tadd sp, fp, %d\n"
-				"\tld ra, 8(fp)\n"
-				"\tld fp, 0(fp)\n"
-				"\tret\n",
-				16 + fn->vararg * 64
-			);
-			break;
-		case Jjmp:
-		Jmp:
-			if (b->s1 != b->link)
-				fprintf(f, "\tj .L%d\n", id0+b->s1->id);
-			else
-				lbl = 0;
-			break;
-		case Jjnz:
-			neg = 0;
-			if (b->link == b->s2) {
-				s = b->s1;
-				b->s1 = b->s2;
-				b->s2 = s;
-				neg = 1;
-			}
-			assert(isreg(b->jmp.arg));
-			fprintf(f,
-				"\tb%sz %s, .L%d\n",
-				neg ? "ne" : "eq",
-				rname(b->jmp.arg.val),
-				id0+b->s2->id
-			);
-			goto Jmp;
-		}
-	}
-	id0 += fn->nblk;
-	elf_emitfnfin(fn->name, f);
-#endif
 }

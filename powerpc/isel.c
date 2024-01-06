@@ -119,16 +119,6 @@ fixarg(Ref *r, int k, Ins *i, Fn *fn)
 	*r = r1;
 }
 
-static void
-negate(Ref *pr, Fn *fn)
-{
-	Ref r;
-
-	r = newtmp("isel", Kw, fn);
-	emit(Oxor, Kw, *pr, r, getcon(1, fn));
-	*pr = r;
-}
-
 static int
 selcmp(Ref arg[2], int k, Fn *fn)
 {
