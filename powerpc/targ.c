@@ -7,7 +7,7 @@ PowerpcOp powerpc_op[NOp] = {
 };
 
 int powerpc_rsave[] = {
-	R0, R1, R2, R3, R4, R5, R6, R7,
+	R3, R4, R5, R6, R7,
 	R8, R9, R10, R11, R12,
 	F0, F1, F2, F3, F4, F5, F6, F7,
 	F8, F9, F10, F11, F12, F13,
@@ -23,7 +23,7 @@ int powerpc_rclob[] = {
 	-1
 };
 
-#define RGLOB (BIT(R1) | BIT(R2))
+#define RGLOB (BIT(R0) | BIT(R1) | BIT(R2))
 
 static int
 powerpc_memargs(int op)
@@ -39,7 +39,7 @@ Target T_powerpc = {
 	.fpr0 = F0,
 	.nfpr = NFPR,
 	.rglob = RGLOB,
-	.nrglob = 2,
+	.nrglob = 3,
 	.rsave = powerpc_rsave,
 	.nrsave = {NGPS, NFPS},
 	.retregs = powerpc_retregs,

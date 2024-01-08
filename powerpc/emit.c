@@ -285,7 +285,7 @@ loadaddr(Con *c, char *rn, FILE *f)
 	default:
 		die("unreachable");
 	case SGlo: /* Global */
-		fprintf(f, "\tlwz %s, %s@got(%%r31)\n", rn, str(c->sym.id));
+		fprintf(f, "\tlis %s, %s@ha\n", rn, str(c->sym.id));
 		break;
 	}
 }

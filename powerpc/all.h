@@ -35,7 +35,7 @@ enum PowerpcReg {
 
 	NFPR = F31 - F0 + 1,
 	NGPR = R31 - R0 + 1,
-	NGPS = R12 - R0 + 1,
+	NGPS = R12 - R3 + 1,
 	NFPS = F13 - F0 + 1,
 	NCLR = (R31 - R14 + 1) + (F31 - F14 + 1),
 };
