@@ -123,12 +123,12 @@ static struct {
 	{ Oload,   Kd, "lfd %=, %M0" },
 
 
-	{ Oextsb,  Ki, "sext.b %=, %0" },
-	{ Oextub,  Ki, "zext.b %=, %0" },
-	{ Oextsh,  Ki, "sext.h %=, %0" },
-	{ Oextuh,  Ki, "zext.h %=, %0" },
-	{ Oextsw,  Kl, "sext.w %=, %0" },
-	{ Oextuw,  Kl, "zext.w %=, %0" },
+	{ Oextsb,  Ki, "extsb %=, %0" },
+	{ Oextub,  Ki, "rlwinm %=, %0, 0, 0xff" },
+	{ Oextsh,  Ki, "extsh %=, %0" },
+	{ Oextuh,  Ki, "rlwinm %=, %0, 0, 0xffff" },
+	{ Oextsw,  Kl, "extsw %=, %0" },
+	{ Oextuw,  Kl, "mr %=, %0" },
 	
 	/* fcvt.s.d means from double to single */
 	{ Otruncd, Ks, "frsp %=, %0" },
