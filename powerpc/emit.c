@@ -425,14 +425,20 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		assert(rtype(i->arg[0]) == RSlot);
 		rn = rname(i->to.val);
 		s = slot(i->arg[0], fn);
-		if (-s < 2048) {
-			fprintf(f, "\tadd %s, fp, %"PRId64"\n", rn, s);
+		if (s > -32768) {
+			fprintf(f, "\tstwu %s, %"PRId64"(%%r1)\n", rn, s);
 		} else {
+			/* Do we really have to use r0? */
 			fprintf(f,
-				"\tli %s, %"PRId64"\n"
-				"\tadd %s, fp, %s\n",
-				rn, s, rn, rn
-			);
+			    "\tli %s, 0\n"
+			    "\tori %s, %s, %"PRId64"\n"
+			    "\tlwz %%r0, 0(%%r1)\n"
+			    "\tneg %s, %s\n"
+			    "\tstwux %s, %%r1, %%r0\n",
+			    rn,
+			    rn, rn, -s & 0xffff,
+			    rn, rn,
+			    rn);
 		}
 		break;
 	case Ocall:
