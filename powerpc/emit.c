@@ -53,8 +53,8 @@ static struct {
 	{ Oneg,    Ki, "neg%k %=, %0" },
 	{ Oneg,    Ka, "fneg%k %=, %0" },
 	
-	{ Odiv,    Ki, "div%k %=, %0, %1" },
-	{ Oudiv,   Ki, "div%ku %=, %0, %1" },
+	{ Odiv,    Ki, "divw %=, %0, %1" },
+	{ Oudiv,   Ki, "divwu %=, %0, %1" },
 	{ Odiv,    Ka, "fdiv%k %=, %0, %1" },
 	
 	/* PowerPC Microprocessor Family: The Programming Environments 8-58 */
@@ -62,8 +62,8 @@ static struct {
 	{ Ourem,   Ki, "divwu %?, %0, %1\n\tmullw %?, %?, %1\n\tsubf %=, %?, %0" },
 
 	/* Here %k could be w for word and d for double word */
-	{ Omul,    Ki, "mull%k %=, %0, %1" },
-	{ Omul,    Ka, "fmul%k %=, %0, %1" },
+	{ Omul,    Ki, "mul %=, %0, %1" },
+	{ Omul,    Ka, "fmul %=, %0, %1" },
 	
 	/* logical operators */
 	{ Oand,    Ki, "and %=, %0, %1" },
