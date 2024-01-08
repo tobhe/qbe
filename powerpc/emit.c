@@ -62,8 +62,8 @@ static struct {
 	{ Ourem,   Ki, "divwu %?, %0, %1\n\tmullw %?, %?, %1\n\tsubf %=, %?, %0" },
 
 	/* Here %k could be w for word and d for double word */
-	{ Omul,    Ki, "mul %=, %0, %1" },
-	{ Omul,    Ka, "fmul %=, %0, %1" },
+	{ Omul,    Ki, "mullw %=, %0, %1" },
+	{ Omul,    Ka, "fmullw %=, %0, %1" },
 	
 	/* logical operators */
 	{ Oand,    Ki, "and %=, %0, %1" },
