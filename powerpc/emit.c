@@ -166,7 +166,6 @@ static struct {
 	{ Oreqz,   Ki, "seqz %=, %0" },
 	{ Ornez,   Ki, "snez %=, %0" },
 	*/
-	{ Ocall,   Kw, "jalr %0" },
 
 #define X(c, str) \
 	{ Oflag+c, Ki, "#lol: " str },
@@ -452,7 +451,11 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			fprintf(f, "\tbl %s\n", str(con->sym.id));
 			break;
 		case RTmp:
-			emitf("jalr %0", i, fn, f);
+			rn = rname(i->to.val);
+			fprintf(f,
+			    "\tmtlr %s\n"
+			    "\tblrl\n",
+			    rn);
 			break;
 		default:
 		Invalid:
