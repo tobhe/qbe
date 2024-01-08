@@ -100,8 +100,8 @@ static struct {
 	{ Ostoreb, Kw, "stb %0, %M1" },
 	{ Ostoreh, Kw, "sth %0, %M1" },
 	{ Ostorew, Kw, "stw %0, %M1" },
-	/* double word */
-	{ Ostorel, Ki, "std %0, %M1" },
+	/* XXX: needs work-around, std instruction only exist for ppc64 */
+	{ Ostorel, Ki, "stw %0, %M1" },
 	{ Ostores, Kw, "stfs %0, %M1" },
 	{ Ostored, Kw, "stfd %0, %M1" },
 	
