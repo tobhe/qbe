@@ -378,6 +378,12 @@ emitins(Ins *i, Fn *fn, FILE *f)
 	case Onop:
 		break;
 	/* Immediates */
+	case Oacmp:
+		if (isreg(i->arg[2]))
+			goto Table;
+
+		emitf("cmpwi 7, %0, %1", i, fn, f);
+		break;
 	case Oadd:
 		if (isreg(i->arg[1]))
 			goto Table;
