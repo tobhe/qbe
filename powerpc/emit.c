@@ -515,11 +515,6 @@ powerpc_emitfn(Fn *fn, FILE *f)
 
 	emitfnlnk(fn->name, &fn->lnk, f);
 
-	for (r=powerpc_rclob, off=0; *r>=0; r++) {
-		if (fn->reg & BIT(*r))
-			fprintf(stderr, "found 1\n");
-	}
-
 	fs = ROUNDUP(12);
 
 	/* Adjust SP + Back chain */
