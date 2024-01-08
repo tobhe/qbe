@@ -53,70 +53,46 @@ immarg(Ref *r, int op, Ins *i)
 }
 
 static void
-fixarg(Ref *r, int k, Ins *i, Fn *fn)
+fixarg(Ref *r, int k, int phi, Fn *fn)
 {
 	char buf[32];
-	Ref r0, r1;
-	int s, n, op;
 	Con *c;
+	Ref r0, r1, r2;
+	int s, n;
 
-	r0 = r1 = *r;
-	op = i ? i->op : Ocopy;
+	r0 = *r;
 	switch (rtype(r0)) {
 	case RCon:
 		c = &fn->con[r0.val];
-		if (c->type == CAddr && memarg(r, op, i))
-			break;
-		if (c->type == CBits && immarg(r, op, i))
-		if (-2048 <= c->bits.i && c->bits.i < 2048)
-			break;
+		if (KBASE(k) == 0 && phi)
+			return;
 		r1 = newtmp("isel", k, fn);
-		if (KBASE(k) == 1) {
-			/* load floating points from memory
-			 * slots, they can't be used as
-			 * immediates
-			 */
-			assert(c->type == CBits);
+		if (KBASE(k) == 0) {
+			emit(Ocopy, k, r1, r0, R);
+		} else {
 			n = stashbits(&c->bits, KWIDE(k) ? 8 : 4);
 			vgrow(&fn->con, ++fn->ncon);
 			c = &fn->con[fn->ncon-1];
 			sprintf(buf, "\"%sfp%d\"", T.asloc, n);
 			*c = (Con){.type = CAddr};
 			c->sym.id = intern(buf);
-			emit(Oload, k, r1, CON(c-fn->con), R);
+			r2 = newtmp("isel", Kl, fn);
+			emit(Oload, k, r1, r2, R);
+			emit(Ocopy, Kl, r2, CON(c-fn->con), R);
 			break;
 		}
 		emit(Ocopy, k, r1, r0, R);
+		*r = r1;
 		break;
 	case RTmp:
-		if (isreg(r0))
-			break;
 		s = fn->tmp[r0.val].slot;
-		if (s != -1) {
-			/* aggregate passed by value on
-			 * stack, or fast local address,
-			 * replace with slot if we can
-			 */
-			if (memarg(r, op, i)) {
-				r1 = SLOT(s);
-				break;
-			}
-			r1 = newtmp("isel", k, fn);
-			emit(Oaddr, k, r1, SLOT(s), R);
+		if (s == -1)
 			break;
-		}
-		if (k == Kw && fn->tmp[r0.val].cls == Kl) {
-			/* TODO: this sign extension isn't needed
-			 * for 32-bit arithmetic instructions
-			 */
-			r1 = newtmp("isel", k, fn);
-			emit(Oextsw, Kl, r1, r0, R);
-		} else {
-			assert(k == fn->tmp[r0.val].cls);
-		}
+		r1 = newtmp("isel", Kl, fn);
+		emit(Oaddr, Kl, r1, SLOT(s), R);
+		*r = r1;
 		break;
 	}
-	*r = r1;
 }
 
 static int
@@ -177,7 +153,7 @@ sel(Ins i, Fn *fn)
 	if (INRANGE(i.op, Oalloc, Oalloc1)) {
 		i0 = curi - 1;
 		salloc(i.to, i.arg[0], fn);
-		fixarg(&i0->arg[0], Kl, i0, fn);
+		fixarg(&i0->arg[0], Kl, 0, fn);
 		return;
 	}
 	/* Taken from ARM64 */
@@ -193,8 +169,8 @@ sel(Ins i, Fn *fn)
 	if (i.op != Onop) {
 		emiti(i);
 		i0 = curi; /* fixarg() can change curi */
-		fixarg(&i0->arg[0], argcls(&i, 0), i0, fn);
-		fixarg(&i0->arg[1], argcls(&i, 1), i0, fn);
+		fixarg(&i0->arg[0], argcls(&i, 0), 0, fn);
+		fixarg(&i0->arg[1], argcls(&i, 1), 0, fn);
 	}
 }
 
@@ -270,7 +246,7 @@ powerpc_isel(Fn *fn)
 			for (p=(*sb)->phi; p; p=p->link) {
 				for (n=0; p->blk[n] != b; n++)
 					assert(n+1 < p->narg);
-				fixarg(&p->arg[n], p->cls, 0, fn);
+				fixarg(&p->arg[n], p->cls, 1, fn);
 			}
 		seljmp(b, fn);
 		for (i=&b->ins[b->nins]; i!=b->ins;)

@@ -207,15 +207,6 @@ slot(Ref r, Fn *fn)
 }
 
 static void
-emitaddr(Con *c, FILE *f)
-{
-	assert(c->sym.type == SGlo);
-	fputs(str(c->sym.id), f);
-	if (c->bits.i)
-		fprintf(f, "+%"PRIi64, c->bits.i);
-}
-
-static void
 emitf(char *s, Ins *i, Fn *fn, FILE *f)
 {
 	Ref r;
@@ -268,32 +259,15 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 			break;
 		case 'M':
 			c = *s++;
-			assert(c == '0' || c == '1');
-			r = i->arg[c - '0'];
+			assert(c == '0' || c == '1' || c == '=');
+			r = c == '=' ? i->to : i->arg[c - '0'];
 			switch (rtype(r)) {
-			default:
-				die("invalid address argument");
-			case RTmp:
-				fprintf(f, "0(%s)", rname(r.val));
-				break;
-			case RCon:
-				pc = &fn->con[r.val];
-				assert(pc->type == CAddr);
-				emitaddr(pc, f);
-				if (isstore(i->op)
-				|| (isload(i->op) && KBASE(i->cls) == 1)) {
-					/* store (and float load)
-					 * pseudo-instructions need a
-					 * temporary register in which to
-					 * load the address
-					 */
-					fprintf(f, ", %%r6");
-				}
-				break;
 			case RSlot:
-				offset = slot(r, fn);
-				assert(offset >= -2048 && offset <= 2047);
-				fprintf(f, "%d(fp)", (int)offset);
+			default:
+				die("todo (powerpc emit): unhandled ref");
+			case RTmp:
+				assert(isreg(r));
+				fprintf(f, "0(%s)", rname(r.val));
 				break;
 			}
 			break;
@@ -304,23 +278,15 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 static void
 loadaddr(Con *c, char *rn, FILE *f)
 {
-	char off[32];
+	char off[32], *s;
 
-	if (c->sym.type == SThr) {
-		if (c->bits.i)
-			sprintf(off, "+%"PRIi64, c->bits.i);
-		else
-			off[0] = 0;
-		fprintf(f, "\tlui %s, %%tprel_hi(%s)%s\n",
-			rn, str(c->sym.id), off);
-		fprintf(f, "\tadd %s, %s, tp, %%tprel_add(%s)%s\n",
-			rn, rn, str(c->sym.id), off);
-		fprintf(f, "\taddi %s, %s, %%tprel_lo(%s)%s\n",
-			rn, rn, str(c->sym.id), off);
-	} else {
-		fprintf(f, "\tla %s, ", rn);
-		emitaddr(c, f);
-		fputc('\n', f);
+	switch (c->sym.type) {
+	case SThr: /* Thread local */
+	default:
+		die("unreachable");
+	case SGlo: /* Global */
+		fprintf(f, "\tlwz %s, %s@got(%%r31)\n", rn, str(c->sym.id));
+		break;
 	}
 }
 
