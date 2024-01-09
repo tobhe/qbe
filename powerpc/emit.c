@@ -211,7 +211,6 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 	Ref r;
 	int k, c;
 	Con *pc;
-	int64_t offset;
 
 	fputc('\t', f);
 	for (;;) {
@@ -277,8 +276,6 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 static void
 loadaddr(Con *c, char *rn, FILE *f)
 {
-	char off[32], *s;
-
 	switch (c->sym.type) {
 	case SThr: /* Thread local */
 	default:
@@ -512,7 +509,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	#undef X
 	};
 	static int id0;
-	int lbl, c, off, *r;
+	int lbl, c;
 	Blk *b, *t;
 	Ins *i;
 	size_t fs;
