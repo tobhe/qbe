@@ -127,7 +127,7 @@ static struct {
 	{ Oextub,  Ki, "rlwinm %=, %0, 0, 0xff" },
 	{ Oextsh,  Ki, "extsh %=, %0" },
 	{ Oextuh,  Ki, "rlwinm %=, %0, 0, 0xffff" },
-	{ Oextsw,  Kl, "extsw %=, %0" },
+	{ Oextsw,  Kl, "mr %=, %0" },
 	{ Oextuw,  Kl, "mr %=, %0" },
 	
 	/* fcvt.s.d means from double to single */
