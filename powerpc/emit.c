@@ -421,13 +421,11 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		emitf("xori %=, %0, %1", i, fn, f);
 		break;
 	/* End Immediates */
-	case Oaddr:
+	case Oaddr: /* stack allocation */
 		assert(rtype(i->arg[0]) == RSlot);
 		rn = rname(i->to.val);
 		s = slot(i->arg[0], fn);
-		if (s > -32768) {
-			fprintf(f, "\tstwu %s, %"PRId64"(%%r1)\n", rn, s);
-		} else {
+		if (s <= -32768) {
 			/* Do we really have to use r0? */
 			fprintf(f,
 			    "\tli %s, 0\n"
@@ -439,6 +437,8 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			    rn, rn, -s & 0xffff,
 			    rn, rn,
 			    rn);
+		} else {
+			fprintf(f, "\tstwu %s, %"PRId64"(%%r1)\n", rn, s);
 		}
 		break;
 	case Ocall:
