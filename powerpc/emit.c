@@ -200,9 +200,10 @@ slot(Ref r, Fn *fn)
 	s = rsval(r);
 	assert(s <= fn->slot);
 	if (s < 0)
+		/* XXX: not handled atm */
 		return 8 * -s;
 	else
-		return -4 * (fn->slot - s);
+		return -16 * (fn->slot - s);
 }
 
 static void
@@ -418,31 +419,11 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		emitf("xori %=, %0, %1", i, fn, f);
 		break;
 	/* End Immediates */
-	case Oaddr: /* stack allocation */
+	case Oaddr:
 		assert(rtype(i->arg[0]) == RSlot);
 		rn = rname(i->to.val);
 		s = slot(i->arg[0], fn);
-		if (s <= -32768) {
-			/* Do we really have to use r0? */
-			fprintf(f,
-			    "\tli %s, 0\n"
-			    "\tori %s, %s, %"PRId64"\n"
-			    "\tlwz %%r0, 0(%%r1)\n"
-			    "\tneg %s, %s\n"
-			    "\tstwux %s, %%r1, %%r0\n",
-			    rn,
-			    rn, rn, -s & 0xffff,
-			    rn, rn,
-			    rn);
-		} else {
-			fprintf(f, "\tlwz %s, 0(%%r1)\n", rn);
-			fprintf(f, "\tstwu %s, %"PRId64"(%%r1)\n", rn, -ROUNDUP(-s));
-			fprintf(f, "\taddi %s, %%r1, 8\n", rn);
-			fprintf(f, "\taddi %s, %s, 15\n", rn, rn);
-			fprintf(f, "\tsrwi %s, %s, 4\n", rn, rn);
-			fprintf(f, "\tslwi %s, %s, 4\n", rn, rn);
-			fprintf(f, "\tstw %s, 8(%%r31)\n", rn);
-		}
+		fprintf(f, "\taddi %s, %%r1, %"PRId64"\n", rn, s);
 		break;
 	case Ocall:
 		switch (rtype(i->arg[0])) {
@@ -522,7 +503,8 @@ powerpc_emitfn(Fn *fn, FILE *f)
 
 	emitfnlnk(fn->name, &fn->lnk, f);
 
-	fs = ROUNDUP(12);
+	/* (back chain + lr) + ... + slots */
+	fs = ROUNDUP(16 + (16 * fn->slot));
 
 	/* Adjust SP + Back chain */
 	fprintf(f, "\tstwu %%r1, -%zu(%%r1)\n", fs);
