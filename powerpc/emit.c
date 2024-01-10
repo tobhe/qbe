@@ -435,7 +435,13 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			    rn, rn,
 			    rn);
 		} else {
-			fprintf(f, "\tstwu %s, %"PRId64"(%%r1)\n", rn, s);
+			fprintf(f, "\tlwz %s, 0(%%r1)\n", rn);
+			fprintf(f, "\tstwu %s, %"PRId64"(%%r1)\n", rn, -ROUNDUP(-s));
+			fprintf(f, "\taddi %s, %%r1, 8\n", rn);
+			fprintf(f, "\taddi %s, %s, 15\n", rn, rn);
+			fprintf(f, "\tsrwi %s, %s, 4\n", rn, rn);
+			fprintf(f, "\tslwi %s, %s, 4\n", rn, rn);
+			fprintf(f, "\tstw %s, 8(%%r31)\n", rn);
 		}
 		break;
 	case Ocall:
@@ -543,14 +549,17 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			/* Load return value in return register */
 			/* TODO change 9 to actal register*/
 
-			fprintf(f, "\tlwz %%r0, 20(%%r1)\n");
+			/* r31 == back chain */
+			fprintf(f, "\tlwz %%r31, 0(%%r1)\n");
 
-			/* Calculate environment pointer */
-			fprintf(f, "\tlwz %%r31,%zu(%%r1)\n", fs-4);
+			/* r0 == LR */
+			fprintf(f, "\tlwz %%r0, -4(%%r31)\n");
 
-			/* Reset stack pointer */
-			fprintf(f, "\taddi %%r1,%%r1,%zu\n", fs);
+			/* Reset stack and frame pointer */
+			fprintf(f, "\tmr %%r1,%%r31\n");
+			fprintf(f, "\tmr %%r31,%%r0\n");
 
+			fprintf(f, "\tlwz %%r0, 4(%%r1)\n");
 			fprintf(f, "\tmtlr %%r0\n");
 
 			/* return */
