@@ -303,7 +303,11 @@ loadcon(Con *c, int r, int k, FILE *f)
 		n = c->bits.i;
 		if (!KWIDE(k))
 			n = (int32_t)n;
-		fprintf(f, "\tli %s, %"PRIi64"\n", rn, n);
+		if (n < -0x8000 || n > 0x7fff) {
+			fprintf(f, "\tli %s, %"PRIu32"\n", rn, (uint32_t)n >> 16);
+			fprintf(f, "\tori %s, %s, %"PRIu32"\n", rn, rn, (uint32_t)n % 0xffff);
+		} else
+			fprintf(f, "\tli %s, %"PRId64"\n", rn, n);
 		break;
 	default:
 		die("invalid constant");
