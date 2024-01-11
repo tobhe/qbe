@@ -452,9 +452,24 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		}
 		break;
 	case Osalloc:
-		emitf("sub sp, sp, %0", i, fn, f);
-		if (!req(i->to, R))
-			emitf("mr %=, sp", i, fn, f);
+		assert(isreg(i->to));
+		rn = rname(i->to.val);
+		switch(rtype(i->arg[0])) {
+		case RCon:
+			con = &fn->con[i->arg[0].val];
+			assert(con->type == CBits);
+			assert(con->bits.i >= -2048 && con->bits.i < 2048);
+			fprintf(f, "\tlwz %s, 0(%%r1)\n", rn);
+			fprintf(f, "\tstwu %s, %d(%%r1)\n", rn,
+			    -((int)con->bits.i));
+			fprintf(f, "\taddi %s, %%r1, 8\n", rn);
+			fprintf(f, "\taddi %s, %s, 15\n", rn, rn);
+			fprintf(f, "\tsrwi %s, %s, 4\n", rn, rn);
+			fprintf(f, "\tslwi %s, %s, 4\n", rn, rn);
+			fprintf(f, "\tstw %s, 8(%%r31)\n", rn);
+		default:
+			die("unimplemented");
+		}
 		break;
 	case Odbgloc:
 		emitdbgloc(i->arg[0].val, i->arg[1].val, f);

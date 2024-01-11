@@ -153,7 +153,6 @@ sel(Ins i, Fn *fn)
 	if (INRANGE(i.op, Oalloc, Oalloc1)) {
 		i0 = curi - 1;
 		salloc(i.to, i.arg[0], fn);
-		fixarg(&i0->arg[0], Kl, 0, fn);
 		return;
 	}
 	/* Taken from ARM64 */
