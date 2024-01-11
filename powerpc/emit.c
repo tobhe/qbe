@@ -90,8 +90,8 @@ static struct {
 	--> Check ARM64 which also seems to only have compare instructions
 	```
 	*/
-	{ Oacmp,   Ki, "cmpw 0, %0, %1" },
-	{ Oafcmp,  Ka, "fcmpu 0, %0, %1" },
+	{ Oacmp,   Ki, "cmpw cr0, %0, %1" },
+	{ Oafcmp,  Ka, "fcmpu cr0, %0, %1" },
 
 	/*
 	Store
@@ -384,7 +384,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		if (isreg(i->arg[2]))
 			goto Table;
 
-		emitf("cmpwi 0, %0, %1", i, fn, f);
+		emitf("cmpwi cr0, %0, %1", i, fn, f);
 		break;
 	case Oadd:
 		if (isreg(i->arg[1]))
@@ -588,7 +588,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 			} else
 				c = cmpneg(c);
 			fprintf(f,
-				"\tb%s\t%s%d\n",
+				"\tb%s cr0, %s%d\n",
 				ctoa[c], T.asloc, id0+b->s2->id
 			);
 			goto Jmp;
