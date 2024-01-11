@@ -462,6 +462,8 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			fprintf(f, "\tlwz %s, 0(%%r1)\n", rn);
 			fprintf(f, "\tstwu %s, %d(%%r1)\n", rn,
 			    -((int)con->bits.i));
+
+			/* TODO: use smarter shifts */
 			fprintf(f, "\taddi %s, %%r1, 8\n", rn);
 			fprintf(f, "\taddi %s, %s, 15\n", rn, rn);
 			fprintf(f, "\tsrwi %s, %s, 4\n", rn, rn);
