@@ -469,6 +469,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 			fprintf(f, "\tsrwi %s, %s, 4\n", rn, rn);
 			fprintf(f, "\tslwi %s, %s, 4\n", rn, rn);
 			fprintf(f, "\tstw %s, 8(%%r31)\n", rn);
+			break;
 		default:
 			die("unimplemented");
 		}
