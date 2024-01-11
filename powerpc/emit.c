@@ -227,9 +227,9 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 			die("invalid escape");
 		case '?':
 			if (KBASE(k) == 0)
-				fputs("%r6", f);
+				fputs("%r0", f);
 			else
-				fputs("%f11", f);
+				fputs("%f1", f);
 			break;
 		case 'k':
 			break;
