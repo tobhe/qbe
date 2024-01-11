@@ -192,7 +192,7 @@ rname(int r)
 	return buf;
 }
 
-static int64_t
+static uint32_t
 slot(Ref r, Fn *fn)
 {
 	int s;
@@ -203,7 +203,7 @@ slot(Ref r, Fn *fn)
 		/* XXX: not handled atm */
 		return 8 * -s;
 	else
-		return -16 * (fn->slot - s);
+		return 16 * (fn->slot - s);
 }
 
 static void
@@ -319,7 +319,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 {
 	int o;
 	char *rn;
-	int64_t s;
+	uint32_t s;
 	Con *con;
 
 	switch (i->op) {
@@ -427,7 +427,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		assert(rtype(i->arg[0]) == RSlot);
 		rn = rname(i->to.val);
 		s = slot(i->arg[0], fn);
-		fprintf(f, "\taddi %s, %%r1, %"PRId64"\n", rn, s);
+		fprintf(f, "\taddi %s, %%r31, %"PRIu32"\n", rn, s);
 		break;
 	case Ocall:
 		switch (rtype(i->arg[0])) {
