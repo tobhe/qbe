@@ -150,11 +150,13 @@ static struct {
 	{ Osltof,  Ka, "fcvt%k.l %=, %0" },
 	{ Oultof,  Ka, "fcvt%k.lu %=, %0" },
 	
-	{ Ocast,   Kw, "fmv.x.w %=, %0" },
-	{ Ocast,   Kl, "fmv.x.d %=, %0" },
-	{ Ocast,   Kd, "fmv.d.x %=, %0" },
 	*/
 
+	/* from integer to floating */
+	{ Ocast,   Kw, "fcfid %=, %0" },
+	{ Ocast,   Kl, "fcfid %=, %0" },
+	/* from floating to integer */
+	{ Ocast,   Kd, "fctiwz %=, %0" },
 	{ Ocast,   Ks, "fctiwz %=, %0" },
 
 	{ Ocopy,   Ki, "mr %=, %0" },
