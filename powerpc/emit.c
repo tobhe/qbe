@@ -436,7 +436,7 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		break;
 	/* Immediates */
 	case Oacmp:
-		if (isreg(i->arg[2]))
+		if (isreg(i->arg[1]))
 			goto Table;
 
 		emitf("cmpwi cr0, %0, %1", i, fn, f);
