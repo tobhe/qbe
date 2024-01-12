@@ -203,7 +203,7 @@ slot(Ref r, Fn *fn)
 		/* XXX: not handled atm */
 		return 8 * -s;
 	else
-		return 16 * (fn->slot - s);
+		return 16 + 4 * s;
 }
 
 static void
