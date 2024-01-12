@@ -463,12 +463,12 @@ rv64_emitfn(Fn *fn, FILE *f)
 	fprintf(f, "\tsd ra, -8(sp)\n");
 	fprintf(f, "\tadd fp, sp, -16\n");
 
-	frame = (16 + 4 * fn->slot + 15) & ~15;
+	frame = ROUNDUP(16 + 4 * fn->slot, 16);
 	for (pr=rv64_rclob; *pr>=0; pr++) {
 		if (fn->reg & BIT(*pr))
 			frame += 8;
 	}
-	frame = (frame + 15) & ~15;
+	frame = ROUNDUP(frame, 16);
 
 	if (frame <= 2048)
 		fprintf(f,

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ROUNDUP(x, y) (((x) + ((y) - 1u)) & ~((y) - 1u))
 #define MAKESURE(what, x) typedef char make_sure_##what[(x)?1:-1]
 #define die(...) die_(__FILE__, __VA_ARGS__)
 
