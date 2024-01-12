@@ -136,7 +136,6 @@ static struct {
 	/*
 	 * Conversion does not seem necessary for other types
 	 * should just work with load
-	{ Oexts,   Kd, "fcvt.d.s %=, %0" },
 	{ Ostosi,  Kw, "fcvt.w.s %=, %0, rtz" },
 	{ Ostosi,  Kl, "fcvt.l.s %=, %0, rtz" },
 	{ Ostoui,  Kw, "fcvt.wu.s %=, %0, rtz" },
@@ -158,6 +157,8 @@ static struct {
 	/* from floating to integer */
 	{ Ocast,   Kd, "fctiwz %=, %0" },
 	{ Ocast,   Ks, "fctiwz %=, %0" },
+	/* double to single */
+	{ Oexts,   Kd, "frsp %=, %0" },
 
 	{ Ocopy,   Ki, "mr %=, %0" },
 	{ Ocopy,   Ka, "fmr %=, %0" },
