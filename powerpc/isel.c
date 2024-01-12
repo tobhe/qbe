@@ -53,19 +53,23 @@ immarg(Ref *r, int op, Ins *i)
 }
 
 static void
-fixarg(Ref *r, int k, int phi, Fn *fn)
+fixarg(Ref *r, int k, Ins *i, int phi, Fn *fn)
 {
 	char buf[32];
 	Con *c;
 	Ref r0, r1, r2;
-	int s, n;
+	int s, n, op;
 
 	r0 = *r;
+	op = i ? i->op : Ocopy;
 	switch (rtype(r0)) {
 	case RCon:
 		c = &fn->con[r0.val];
 		if (KBASE(k) == 0 && phi)
 			return;
+		if (c->type == CBits && immarg(r, op, i) &&
+		   -2048 <= c->bits.i && c->bits.i < 2048)
+			break;
 		r1 = newtmp("isel", k, fn);
 		if (KBASE(k) == 0) {
 			emit(Ocopy, k, r1, r0, R);
@@ -106,8 +110,8 @@ selcmp(Ref arg[2], int k, Fn *fn)
 	if (KBASE(k) == 1) {
 		emit(Oafcmp, k, R, arg[0], arg[1]);
 		iarg = curi->arg;
-		fixarg(&iarg[0], k, 0, fn);
-		fixarg(&iarg[1], k, 0, fn);
+		fixarg(&iarg[0], k, curi, 0, fn);
+		fixarg(&iarg[1], k, curi, 0, fn);
 		return 0;
 	}
 	swap = rtype(arg[0]) == RCon;
@@ -138,9 +142,9 @@ selcmp(Ref arg[2], int k, Fn *fn)
 	}
 	emit(cmp, k, R, arg[0], r);
 	iarg = curi->arg;
-	fixarg(&iarg[0], k, 0, fn);
+	fixarg(&iarg[0], k, curi, 0, fn);
 	if (fix)
-		fixarg(&iarg[1], k, 0, fn);
+		fixarg(&iarg[1], k, curi, 0, fn);
 	return swap;
 }
 
@@ -168,8 +172,8 @@ sel(Ins i, Fn *fn)
 	if (i.op != Onop) {
 		emiti(i);
 		i0 = curi; /* fixarg() can change curi */
-		fixarg(&i0->arg[0], argcls(&i, 0), 0, fn);
-		fixarg(&i0->arg[1], argcls(&i, 1), 0, fn);
+		fixarg(&i0->arg[0], argcls(&i, 0), i0, 0, fn);
+		fixarg(&i0->arg[1], argcls(&i, 1), i0, 0, fn);
 	}
 }
 
@@ -245,7 +249,7 @@ powerpc_isel(Fn *fn)
 			for (p=(*sb)->phi; p; p=p->link) {
 				for (n=0; p->blk[n] != b; n++)
 					assert(n+1 < p->narg);
-				fixarg(&p->arg[n], p->cls, 1, fn);
+				fixarg(&p->arg[n], p->cls, NULL, 1, fn);
 			}
 		seljmp(b, fn);
 		for (i=&b->ins[b->nins]; i!=b->ins;)

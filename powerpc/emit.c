@@ -455,13 +455,13 @@ emitins(Ins *i, Fn *fn, FILE *f)
 		if (isreg(i->arg[1]))
 			goto Table;
 
-		emitf("si %=, %0, %1", i, fn, f);
+		emitf("subi %=, %0, %1", i, fn, f);
 		break;
 	case Oand:
 		if (isreg(i->arg[1]))
 			goto Table;
 
-		emitf("andi %=, %0, %1", i, fn, f);
+		emitf("andi. %=, %0, %1", i, fn, f);
 		break;
 	case Oor:
 		if (isreg(i->arg[1]))

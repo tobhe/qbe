@@ -2,7 +2,7 @@
 
 PowerpcOp powerpc_op[NOp] = {
 #define O(op, t, x) [O##op] =
-#define V(imm) { imm },
+#define P(imm) { imm },
 #include "../ops.h"
 };
 
