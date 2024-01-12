@@ -152,9 +152,10 @@ static struct {
 	
 	{ Ocast,   Kw, "fmv.x.w %=, %0" },
 	{ Ocast,   Kl, "fmv.x.d %=, %0" },
-	{ Ocast,   Ks, "fmv.w.x %=, %0" },
 	{ Ocast,   Kd, "fmv.d.x %=, %0" },
 	*/
+
+	{ Ocast,   Ks, "fctiwz %=, %0" },
 
 	{ Ocopy,   Ki, "mr %=, %0" },
 	{ Ocopy,   Ka, "fmr %=, %0" },
