@@ -168,9 +168,32 @@ static struct {
 	*/
 
 #define X(c, str) \
-	{ Oflag+c, Ki, "#lol: " str },
-	CMP(X)
+	{ Oflag+c, Ki, "mfcr %=\n\t\trlwinm %=, %=, %B" str ", 31, 31" },
+#define Y(c, str) \
+	{ Oflag+c, Ki, "mfcr %=\n\trlwinm %=, %=, %B" str ", 31, 31\n\txor %=, %=, 1" },
+
+	X(Cieq,       "eq")
+	X(Cisgt,      "gt")
+	X(Cislt,      "lt")
+	X(Ciugt,      "hi")
+	X(Ciult,      "cc")
+
+	Y(Cine,       "ne")
+	Y(Cisge,      "ge")
+	Y(Cisle,      "le")
+	Y(Ciuge,      "cs")
+	Y(Ciule,      "ls")
+
+	X(NCmpI+Cfeq, "eq")
+	X(NCmpI+Cfge, "ge")
+	X(NCmpI+Cfgt, "gt")
+	X(NCmpI+Cfle, "ls")
+	X(NCmpI+Cflt, "mi")
+	X(NCmpI+Cfne, "ne")
+	X(NCmpI+Cfo,  "vc")
+	X(NCmpI+Cfuo, "vs")
 #undef X
+#undef Y
 
 	{ NOp, 0, 0 }
 };
@@ -255,6 +278,27 @@ emitf(char *s, Ins *i, Fn *fn, FILE *f)
 				fprintf(f, "%d", (int)pc->bits.i);
 				break;
 			}
+			break;
+		case 'B':
+			if (strncmp(s, "eq", 2) == 0 ||
+			    strncmp(s, "ne", 2) == 0) {
+				fprintf(f, "%d", 3);
+				s += 2;
+			} 
+			if (strncmp(s, "gt", 2) == 0 ||
+			    strncmp(s, "hi", 2) == 0 ||
+			    strncmp(s, "ls", 2) == 0 ||
+			    strncmp(s, "le", 2) == 0) {
+				fprintf(f, "%d", 2);
+				s += 2;
+			} 
+			if (strncmp(s, "lt", 2) == 0 ||
+			    strncmp(s, "cc", 2) == 0 ||
+			    strncmp(s, "cs", 2) == 0 ||
+			    strncmp(s, "ge", 2) == 0) {
+				fprintf(f, "%d", 1);
+				s += 2;
+			} 
 			break;
 		case 'M':
 			c = *s++;
