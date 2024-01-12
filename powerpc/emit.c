@@ -6,7 +6,6 @@ enum {
 };
 
 #define FRAME_ALIGN	16u
-#define ROUNDUP(x) (((x) + (FRAME_ALIGN - 1u)) & ~(FRAME_ALIGN - 1u))
 
 #define CMP(X) \
 	X(Cieq,       "eq") \
@@ -585,7 +584,7 @@ powerpc_emitfn(Fn *fn, FILE *f)
 	emitfnlnk(fn->name, &fn->lnk, f);
 
 	/* (back chain + lr) + ... + slots */
-	fs = ROUNDUP(16 + (16 * fn->slot));
+	fs = ROUNDUP(16 + (16 * fn->slot), FRAME_ALIGN);
 
 	/* Adjust SP + Back chain */
 	fprintf(f, "\tstwu %%r1, -%zu(%%r1)\n", fs);

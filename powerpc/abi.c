@@ -1,6 +1,6 @@
 #include "all.h"
 
-/* the risc-v lp64d abi */
+/* the powerpc elf abi */
 
 typedef struct Class Class;
 typedef struct Insl Insl;
@@ -329,7 +329,7 @@ stkblob(Ref r, Typ *t, Fn *fn, Insl **ilp)
 	al = t->align - 2; /* specific to NAlign == 3 */
 	if (al < 0)
 		al = 0;
-	sz = (t->size + 7) & ~7;
+	sz = ROUNDUP(t->size, 8);
 	il->i = (Ins){Oalloc+al, Kl, r, {getcon(sz, fn)}};
 	il->link = *ilp;
 	*ilp = il;
