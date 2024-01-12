@@ -304,8 +304,10 @@ loadcon(Con *c, int r, int k, FILE *f)
 		if (!KWIDE(k))
 			n = (int32_t)n;
 		if (n < -0x8000 || n > 0x7fff) {
-			fprintf(f, "\tlis %s, %"PRIi16"\n", rn, (int16_t)((uint32_t)n >> 16));
-			fprintf(f, "\tori %s, %s, %"PRIu16"\n", rn, rn, (uint16_t)(n & 0xffff));
+			fprintf(f, "\tlis %s, %"PRIi16"\n", rn,
+			    (int16_t)((uint32_t)n >> 16));
+			fprintf(f, "\tori %s, %s, %"PRIu16"\n", rn, rn,
+			    (uint16_t)(n & 0xffff));
 		} else
 			fprintf(f, "\tli %s, %"PRId64"\n", rn, n);
 		break;
