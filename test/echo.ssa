@@ -2,8 +2,10 @@ export
 function w $main(w %argc, l %argv) {
 @start
 	%fmt =l alloc8 8
-	storel 1663398693, %fmt             # "%s%c"
-	%av0 =l add %argv, 8
+	%n =l add %fmt, 4
+	storew 0, %n
+	storew 628303203, %fmt             # "%s%c"
+	%av0 =l add %argv, 4
 	%ac0 =w sub %argc, 1
 @loop
 	%av =l phi @start %av0, @loop2 %av1
@@ -21,7 +23,7 @@ function w $main(w %argc, l %argv) {
 	%sep =w phi @last 10, @nolast 32
 	%arg =l loadl %av
 	%r =w call $printf(l %fmt, ..., l %arg, w %sep)
-	%av1 =l add %av, 8
+	%av1 =l add %av, 4
 	%ac1 =w sub %ac, 1
 	jmp @loop
 @end
